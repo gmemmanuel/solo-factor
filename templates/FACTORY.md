@@ -17,7 +17,7 @@ A section that says "none" is better than a section left as a template.
 ## Tracker
 
 - **Where tickets live:** <Linear | none: the factory's own record and the plans are the tickets>
-- **Key format:** <APP-123> · **Link:** <https://linear.app/your-team/issue/{key}> (also set under Factory → Settings)
+- **Key format:** <APP-123> · **Link:** <https://linear.app/your-team/issue/{key}> (also set under the Factory settings page)
 - **How an agent reads, files and updates a ticket:** `node scripts/factory/linear.mjs …` (the `factory-tracker` skill). The API key comes from <`LINEAR_API_KEY` | the command in `tracker.keyCommand`>.
 - **Labels the pipeline moves:** Plan written → Plan reviewed; Small bug; Later. **Started state:** <In Progress>
 
@@ -80,7 +80,7 @@ A section that says "none" is better than a section left as a template.
 
 Which skill each stage uses. The default is the factory's bundled skill; name
 your own when the project has one. Changing a row also needs
-`bb factory stage <stage> --prompt "Use the \`<skill>\` skill to …"`.
+`bb solo-factor stage <stage> --prompt "Use the \`<skill>\` skill to …"`.
 
 | Stage | Skill | Project additions the bundled skill must follow |
 |---|---|---|
@@ -96,7 +96,7 @@ your own when the project has one. Changing a row also needs
 | Agent | On? | Method (skill or runbook it follows) | Schedule |
 |---|---|---|---|
 | Architect | yes | this file + `factory-plan` | weekly retro |
-| Mechanic | yes | `factory-harness-improver` | weekly retro |
+| Mechanic | yes | `factory-mechanic` | weekly retro |
 | Observer | <yes/no> | see "Observer checks" | <daily at …> |
 | Deployer | <yes/no> | <deploy runbook or skill> | on request only |
 | Integrator | <yes/no> | <dependency method> | <weekly> |

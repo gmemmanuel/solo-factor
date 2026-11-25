@@ -1,6 +1,6 @@
-# Factory
+# Solo Factor
 
-A bb plugin that turns bb into a solo founder's software factory. TypeScript, bb plugin SDK. Plugin id `solo-factor`, shown in bb as **Factory**.
+A bb plugin that turns bb into a solo founder's software factory. TypeScript, bb plugin SDK. Plugin id `solo-factor`, shown in bb as **Solo Factor**; its command is `bb solo-factor`, and its pages are Inbox, Swimlanes, Agents and Factory settings. In prose, "the factory" is the thing it runs.
 
 This repository is meant to be forked and changed by the founder who runs it, usually through their Mechanic agent. Read `LEARNINGS.md` and `docs/DECISIONS.md` before changing anything. Log each session in `docs/WORKLOG.md`.
 
@@ -26,14 +26,15 @@ When something is tempting to hardcode, ask which layer it belongs to. It is alm
 | `src/factory/store.ts` | SQLite persistence (plugin database). Migrations are append-only |
 | `src/factory/model.ts` | Zod shapes shared by server and page |
 | `src/factory/defaults.ts` | Default roles, stages, pipelines, standing agents |
-| `src/factory/cli.ts` | `bb factory …` |
-| `app.tsx` | The Factory page: inbox, swimlanes, standing agents, roles |
-| `skills/` | Shipped with the plugin: `factory` (worker protocol), charters (`factory-orchestrator`, `-issue-owner`, `-harness-improver`, `-watch`, `-deploy`, `-integrator`, `-cleaner`, `-contacts`), process (`factory-debug`, `-plan`, `-review-plan`, `-build`, `-review-code`, `-ship`, `-sequence`, `-tracker`) and `factory-onboarding` |
+| `src/factory/cli.ts` | `bb solo-factor …` |
+| `app.tsx` | The pages: inbox, swimlanes, standing agents, settings |
+| `skills/` | Shipped with the plugin: `factory` (worker protocol), charters (`factory-architect`, `-issue-owner`, `-mechanic`, `-observer`, `-deployer`, `-integrator`, `-cleaner`, `-contacts`), process (`factory-debug`, `-plan`, `-review-plan`, `-build`, `-review-code`, `-ship`, `-sequence`, `-tracker`) and `factory-onboarding` |
 | `kit/` | Zero-dependency Node scripts installed into a project as `scripts/factory/`: `plan-doc`, `plan-surfaces`, `review-receipt`, `ship-turn`, `turn`, `sequence`, `linear`, plus `install.mjs` and their `*.test.mjs` |
 | `packs/` | Stack-specific skills that onboarding copies into a project (`mobile`) |
 | `templates/` | `FACTORY.md`, the project profile |
 | `tests/factory.test.ts` | Behaviour tests on the SDK's fake plugin host |
 | `scripts/live-check.mjs` | End-to-end check against a real, throwaway bb server |
+| `docs/index.html` | The walkthrough served by GitHub Pages: coded screens with sample data. `scripts/capture-demo.sh` regenerates `docs/assets/flow.gif` from it |
 | `components/`, `lib/`, `hooks/` | UI source vendored by `bb plugin new`. Ours to edit, but prefer leaving it alone |
 
 ## Rules

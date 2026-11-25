@@ -117,7 +117,7 @@ it hands you. Ten lines is plenty.
 Rework you send the builder after the founder's notes, or follow-up on a
 shipped ticket, goes through code review again automatically. If a ticket's
 work changed after review some other way and needs a fresh independent
-review, run `bb factory rereview <KEY>`: it goes back to its last review
+review, run `bb solo-factor rereview <KEY>`: it goes back to its last review
 stage in a new thread.
 
 ## Before you ask the founder to do something

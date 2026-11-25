@@ -38,7 +38,7 @@ shared infrastructure.
      of yours. Inspect the difference (`git diff <reviewed>..HEAD`). A merge
      from the base branch and mechanical conflict fixes are yours to close:
      rerun the affected checks and record the closeout below. New behaviour
-     is not: send it back with `bb factory rereview <KEY>`.
+     is not: send it back with `bb solo-factor rereview <KEY>`.
    - **"The review returned a decision":** it must be resolved (by the
      founder or the issue owner) before you record a closeout.
    - **Blocked, missing, malformed, or not an ancestor:** stop and report
@@ -96,7 +96,7 @@ is a change since review: record the closeout.
 - **Follow-ups.** Read the plan's "Follow-ups and out of scope". Anything
   that belongs to an existing ticket, append there. A genuinely new outcome
   is **proposed, never filed by you**: message the Architect
-  (`factory_message` to `orchestrator`) with what users experience today,
+  (`factory_message` to `architect`) with what users experience today,
   what they would after, and why it is worth building.
 - **Decisions and learnings.** Confirm that decisions binding future work
   reached the decision log, and that `LEARNINGS.md` has what was worth

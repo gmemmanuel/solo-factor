@@ -37,8 +37,8 @@ every time.
    writer. Find it (which tool, which job, which setting) and say what would
    stop it. A fix to the cause beats a deletion that has to be repeated. When
    the cause is in the factory, a skill or a check, message the Mechanic with
-   `factory_message` to `harness-improver`. When it is in the product, message
-   the Architect (`orchestrator`).
+   `factory_message` to `mechanic`. When it is in the product, message
+   the Architect (`architect`).
 4. **Ask once.** Put every target that needs approval in one
    `factory_ask_founder` question. Name each target, its size, whether it can be
    recreated, and your recommendation. Do not ask about anything the founder

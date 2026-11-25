@@ -59,7 +59,7 @@ that section.
 - or the change would alter what a user sees, or contradict a recorded
   founder decision.
 
-The first three go to the ticket's issue owner with `factory_ask_planner`
+The first three go to the ticket's issue owner with `factory_ask_owner`
 and a self-contained handoff: branch and head, the approved outcome, the
 blocker with `file:line` and the failing command, what you propose, what is
 already done. The fourth is a product question: `factory_ask_founder`, with

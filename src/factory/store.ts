@@ -281,12 +281,12 @@ function withNewDefaults(saved: Config): Config {
     };
   }
   // The planner became the CTO and Watch the Observer (founder, 21 November);
-  // the CTO became the Architect and the harness improver the Mechanic
+  // the CTO became the Architect and the Mechanic the Mechanic
   // (founder, 21 November, later). Only an earlier default name is replaced.
   const renamedAgents: Record<string, [readonly string[], string]> = {
-    orchestrator: [["Planner / strategist", "CTO"], "Architect"],
-    watch: [["Watch"], "Observer"],
-    "harness-improver": [["Harness improver"], "Mechanic"],
+    architect: [["Planner / strategist", "CTO"], "Architect"],
+    observer: [["Watch"], "Observer"],
+    "mechanic": [["Harness improver"], "Mechanic"],
   };
   const relabel = <T extends { label: string }>(entries: Record<string, T>): Record<string, T> =>
     Object.fromEntries(Object.entries(entries).map(([id, entry]) => [id, renamedAgents[id]?.[0].includes(entry.label) ? { ...entry, label: renamedAgents[id][1] } : entry]));
@@ -294,18 +294,18 @@ function withNewDefaults(saved: Config): Config {
     config = { ...config, roles: relabel(config.roles), agents: relabel(config.agents) };
   }
   // The deployer, added 20 November.
-  if (config.agents.deploy === undefined && config.roles.deploy === undefined) {
-    const sibling = config.agents.orchestrator;
+  if (config.agents.deployer === undefined && config.roles.deployer === undefined) {
+    const sibling = config.agents.architect;
     config = {
       ...config,
-      roles: { ...config.roles, deploy: structuredClone(DEFAULT_CONFIG.roles.deploy!) },
+      roles: { ...config.roles, deployer: structuredClone(DEFAULT_CONFIG.roles.deployer!) },
       agents: {
         ...config.agents,
-        deploy: {
-          ...structuredClone(DEFAULT_CONFIG.agents.deploy!),
+        deployer: {
+          ...structuredClone(DEFAULT_CONFIG.agents.deployer!),
           memoryPath:
             sibling === undefined
-              ? DEFAULT_CONFIG.agents.deploy!.memoryPath
+              ? DEFAULT_CONFIG.agents.deployer!.memoryPath
               : sibling.memoryPath.replace(/[^/]*$/u, "Deployer memory.md"),
         },
       },
@@ -313,7 +313,7 @@ function withNewDefaults(saved: Config): Config {
   }
   // The Cleaner, added 22 November: keeps the founder's computer healthy.
   if (config.agents.cleaner === undefined && config.roles.cleaner === undefined) {
-    const sibling = config.agents.orchestrator;
+    const sibling = config.agents.architect;
     config = {
       ...config,
       roles: { ...config.roles, cleaner: structuredClone(DEFAULT_CONFIG.roles.cleaner!) },
@@ -331,7 +331,7 @@ function withNewDefaults(saved: Config): Config {
   }
   // The Integrator, added 22 November: keeps dependencies current.
   if (config.agents.integrator === undefined && config.roles.integrator === undefined) {
-    const sibling = config.agents.orchestrator;
+    const sibling = config.agents.architect;
     config = {
       ...config,
       roles: { ...config.roles, integrator: structuredClone(DEFAULT_CONFIG.roles.integrator!) },

@@ -34,7 +34,7 @@ Do that work to the project's own standard. Then report exactly once:
 | The stage is completely finished | `factory_stage_done` with `outcome: "complete"` |
 | You are a reviewer and the author must change something you cannot land yourself | `factory_stage_done` with `outcome: "changes_requested"` |
 | You think the founder must decide | `factory_ask_founder`, then end your turn. It goes to the ticket's issue owner first, who may answer it |
-| Something must go back to the planner (the ticket's issue owner) | `factory_ask_planner`, then end your turn |
+| A question, blocker or plan problem for the ticket's issue owner | `factory_ask_owner`, then end your turn |
 | You cannot proceed for another reason | `factory_stage_done` with `outcome: "blocked"` |
 
 Rules:
@@ -49,9 +49,9 @@ Rules:
   `rereview: true` only when your fixes raise a new product or scope decision;
   one review pass is the design.
 - **Every ticket has an issue owner: the agent that reviewed its plan.** It
-  is the "planner" your project's process refers to. When a question, a
-  blocker or a contract problem goes back to the planner, call
-  `factory_ask_planner` with the full handoff. It reaches the owner's thread,
+  holds the plan. When a question, a blocker or a contract problem needs
+  the plan's owner, call
+  `factory_ask_owner` with the full handoff. It reaches the owner's thread,
   its answer arrives here, and the two of you go back and forth as often as
   needed. If you are the issue owner, the `factory-issue-owner` skill is your
   charter.
@@ -104,7 +104,7 @@ Rules:
 
 `factory_message` delivers a message to another factory thread:
 
-- `to: "orchestrator"` (or another standing agent's id)
+- `to: "architect"` (or another standing agent's id)
 - `to: "APP-12"` for the thread running that ticket's current stage
 - `to: "APP-12:build"` for a specific stage's thread
 
@@ -113,24 +113,24 @@ still end with `factory_stage_done`.
 
 ## The command line
 
-Every tool has a `bb factory` equivalent, which also works from threads that
+Every tool has a `bb solo-factor` equivalent, which also works from threads that
 are not part of the factory:
 
 ```sh
-bb factory status                      # lanes, tickets, inbox
-bb factory enqueue APP-12 "Title" --lane Checkout --pipeline planned --brief "…"
-bb factory lanes '{"lanes":[{"name":"Checkout","items":[{"key":"APP-12","title":"…"}]}]}'
-bb factory sync '{"lanes":[…]}'        # make lanes match a schedule; never reorders a lane
-bb factory move APP-12 --lane Plan --position 1
-bb factory advance APP-12              # send a ticket on to its next stage
-bb factory cancel APP-12
-bb factory done --outcome complete --summary "…"
-bb factory ask "Question?" --option "A: …" --option "B: …" --recommend "A, because …"
-bb factory message orchestrator "…"
-bb factory inbox
-bb factory prompt watch "…"            # hand a standing agent a prompt; starts it if needed
-bb factory role ship --provider codex --model <id> --reasoning low
-bb factory config
+bb solo-factor status                      # lanes, tickets, inbox
+bb solo-factor enqueue APP-12 "Title" --lane Checkout --pipeline planned --brief "…"
+bb solo-factor lanes '{"lanes":[{"name":"Checkout","items":[{"key":"APP-12","title":"…"}]}]}'
+bb solo-factor sync '{"lanes":[…]}'        # make lanes match a schedule; never reorders a lane
+bb solo-factor move APP-12 --lane Plan --position 1
+bb solo-factor advance APP-12              # send a ticket on to its next stage
+bb solo-factor cancel APP-12
+bb solo-factor done --outcome complete --summary "…"
+bb solo-factor ask "Question?" --option "A: …" --option "B: …" --recommend "A, because …"
+bb solo-factor message architect "…"
+bb solo-factor inbox
+bb solo-factor prompt observer "…"            # hand a standing agent a prompt; starts it if needed
+bb solo-factor role ship --provider codex --model <id> --reasoning low
+bb solo-factor config
 ```
 
 Add `--json` for machine-readable output and `--project <id>` outside a
@@ -143,5 +143,5 @@ configured number of tickets in flight. Put tickets in the same lane when they
 would collide: the same files, the same deployed function, or one depending on
 the other. Put independent tickets in different lanes.
 
-Pipelines choose where a ticket starts. `bb factory config` lists them; a
+Pipelines choose where a ticket starts. `bb solo-factor config` lists them; a
 ticket that already has a reviewed plan does not need the planning stages.

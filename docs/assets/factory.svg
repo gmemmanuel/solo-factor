@@ -64,7 +64,7 @@
 <line class="grid" x1="0" y1="230" x2="960" y2="230"/>
 <line class="grid" x1="0" y1="270" x2="960" y2="270"/>
 <line class="grid" x1="0" y1="310" x2="960" y2="310"/>
-<text class="title" x="36" y="40">FACTORY</text>
+<text class="title" x="36" y="40">SOLO FACTOR</text>
 <text class="small" x="36" y="58">one ticket in · one merged change out · you only decide</text>
 <text class="small" x="924" y="40" text-anchor="end">Architect · Mechanic · Observer on watch</text>
 <g transform="translate(0,22)">

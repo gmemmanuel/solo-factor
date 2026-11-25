@@ -47,7 +47,7 @@ here.
      to end. File the ticket
      yourself with the project's issue skill and its **Maintenance** label,
      write its plan with the planning skill (Builder: Full-stack unless it is
-     UI work), and queue it in your lane: `bb factory enqueue <KEY> <title>
+     UI work), and queue it in your lane: `bb solo-factor enqueue <KEY> <title>
      --lane Maintenance --pipeline planned --tier N --builder fullstack`. It
      goes through independent plan review, build, code review and the
      checks like any ticket. Do not ask the Architect or the founder, who

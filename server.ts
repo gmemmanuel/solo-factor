@@ -2,7 +2,7 @@
 //
 // Wires the engine (src/factory/engine.ts) to bb: threads are spawned and
 // messaged through bb.sdk, thread lifecycle events drive the pipeline, agents
-// report through native tools or `bb factory`, and the Factory page reads and
+// report through native tools or `bb solo-factor`, and the Factory page reads and
 // writes over RPC.
 import { defineRpcContract, type BbPluginApi } from "@get-bb/plugin-sdk";
 import { existsSync } from "node:fs";
@@ -529,14 +529,14 @@ const toolResult = async (work: () => Promise<string>) => {
   });
 
   bb.agents.registerTool({
-    name: "factory_ask_planner",
+    name: "factory_ask_owner",
     description:
-      "Send something back to this ticket's issue owner, the agent that reviewed its plan. Use it whenever your project's process says a question or blocker goes to the planner. Then end your turn; the owner's answer arrives in this thread.",
+      "Send something back to this ticket's issue owner, the agent that reviewed its plan. Use it for a question, a blocker or a problem with the plan that you cannot settle yourself. Then end your turn; the owner's answer arrives in this thread.",
     presentation: { label: { pending: "Asking the issue owner", completed: "Asked the issue owner" } },
     parameters: z.object({
       question: z.string().min(1).max(8000).describe("The complete handoff: what is blocked, the evidence, what you propose, and what you need decided."),
     }),
-    execute: ({ question }, { threadId }) => toolResult(() => engine.askPlanner(threadId, question)),
+    execute: ({ question }, { threadId }) => toolResult(() => engine.askOwner(threadId, question)),
   });
 
   bb.agents.registerTool({
@@ -581,7 +581,7 @@ const toolResult = async (work: () => Promise<string>) => {
   bb.agents.registerTool({
     name: "factory_message",
     description:
-      'Send a message to another factory thread. `to` is a standing agent ("orchestrator"), a ticket key for its current stage ("APP-12"), "APP-12:build" for one stage\'s thread, or a side thread\'s id ("thr_…") to answer a message it sent you.',
+      'Send a message to another factory thread. `to` is a standing agent ("architect"), a ticket key for its current stage ("APP-12"), "APP-12:build" for one stage\'s thread, or a side thread\'s id ("thr_…") to answer a message it sent you.',
     presentation: { label: { pending: "Messaging a factory agent", completed: "Messaged a factory agent" } },
     parameters: z.object({ to: z.string().min(1).max(80), message: z.string().min(1).max(8000) }),
     execute: ({ to, message }, { threadId, projectId }) =>
@@ -618,7 +618,7 @@ const toolResult = async (work: () => Promise<string>) => {
   });
 
   // Only factory threads get the tools. Stage workers report and ask; standing
-  // agents also queue work and read the board. Everyone else uses `bb factory`.
+  // agents also queue work and read the board. Everyone else uses `bb solo-factor`.
   bb.agents.configure((context) => {
     const binding = (context.pluginMetadata as { binding?: { kind?: unknown; agentId?: unknown; projectId?: unknown } })
       .binding;
@@ -626,8 +626,8 @@ const toolResult = async (work: () => Promise<string>) => {
       // Any stage thread may turn out to own its ticket; the engine refuses
       // the note from one that does not.
       return {
-        tools: ["factory_stage_done", "factory_ask_founder", "factory_ask_planner", "factory_message", "factory_ticket_note", "factory_follow_up", "factory_check_images"],
-        skills: ["factory", "factory-issue-owner", ...PROCESS_SKILLS],
+        tools: ["factory_stage_done", "factory_ask_founder", "factory_ask_owner", "factory_message", "factory_ticket_note", "factory_follow_up", "factory_check_images"],
+        skills: ["solo-factor", "factory-issue-owner", ...PROCESS_SKILLS],
       };
     }
     if (binding?.kind === "agent") {
@@ -638,7 +638,7 @@ const toolResult = async (work: () => Promise<string>) => {
       const charter = agent !== undefined && SKILLS.has(agent.skill) ? [agent.skill] : [];
       return {
         tools: ["factory_ask_founder", "factory_close_ask", "factory_message", "factory_enqueue", "factory_status"],
-        skills: ["factory", ...charter, ONBOARDING_SKILL, SEQUENCE_SKILL, ...PROCESS_SKILLS],
+        skills: ["solo-factor", ...charter, ONBOARDING_SKILL, SEQUENCE_SKILL, ...PROCESS_SKILLS],
       };
     }
     // Any other thread in a project with a factory (a side thread they start,
@@ -652,7 +652,7 @@ const toolResult = async (work: () => Promise<string>) => {
   // ----------------------------------------------------------------------- CLI
 
   bb.cli.register({
-    name: "factory",
+    name: "solo-factor",
     summary: "Run tickets through the factory pipeline: lanes, stages, founder inbox, standing agents",
     commands: CLI_COMMANDS,
     run: (argv, ctx) => runCli(argv, ctx, store, engine, storeScreenshot),
@@ -661,7 +661,7 @@ const toolResult = async (work: () => Promise<string>) => {
   // ------------------------------------------------------------ inbound hook
   //
   // POST /api/v1/plugins/solo-factor/http/prompt  (header x-bb-plugin-token)
-  //   { "projectId": "proj_…", "agent": "watch", "text": "New feedback row 123" }
+  //   { "projectId": "proj_…", "agent": "observer", "text": "New feedback row 123" }
   // Lets a service you control (a deployed function, a CI job) wake a standing
   // agent the moment something happens. Callers should send references such as
   // row ids, not user-written content: the text becomes part of an agent's
@@ -825,7 +825,7 @@ const toolResult = async (work: () => Promise<string>) => {
 const ANSWER_MENTION = "inbox-answer";
 
 /** Skills this plugin ships; `configure` may only select names from here. */
-const SKILLS = new Set(["factory", "factory-orchestrator", "factory-issue-owner", "factory-deploy", "factory-harness-improver", "factory-watch", "factory-cleaner", "factory-integrator", "factory-contacts"]);
+const SKILLS = new Set(["solo-factor", "factory-architect", "factory-issue-owner", "factory-deployer", "factory-mechanic", "factory-observer", "factory-cleaner", "factory-integrator", "factory-contacts"]);
 
 /**
  * The bundled process skills: how to plan, review, build and ship when the

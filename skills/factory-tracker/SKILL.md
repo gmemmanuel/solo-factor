@@ -24,7 +24,7 @@ comes from `LINEAR_API_KEY` or the command the project configured. Never
 print it.
 
 With `tracker.kind: "none"`, there is no tracker: the factory's own record
-(`bb factory status`) and the plan documents are the tickets, and the
+(`bb solo-factor status`) and the plan documents are the tickets, and the
 commands above do not apply.
 
 ## Who may write what

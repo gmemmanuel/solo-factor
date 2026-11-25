@@ -419,7 +419,7 @@ export class FactoryEngine {
    * The founder never carries these. The owner answers with a message to the
    * stage's thread.
    */
-  askPlanner(threadId: string, question: string): Promise<string> {
+  askOwner(threadId: string, question: string): Promise<string> {
     return this.exclusive(async () => {
       const { item, stageId } = this.requireCurrentStage(threadId);
       const label = this.store.getConfig(item.projectId).stages[stageId]?.label ?? stageId;
@@ -749,12 +749,12 @@ export class FactoryEngine {
           return "Findings sent to the author's thread. Your review is recorded. End your turn.";
         }
         // No author stage in this pipeline: the ticket was queued already
-        // authored (for example, planned by the orchestrator).
+        // authored (for example, planned by the architect).
         this.store.saveItem({ ...item, status: "returned", passedReviews, lastSummary: summary });
         if (item.originThreadId !== null) {
           await this.effects.send(
             item.originThreadId,
-            `${findings}\n\nWhen the findings are addressed, run \`bb factory advance ${item.key}\` to send the ticket on.`,
+            `${findings}\n\nWhen the findings are addressed, run \`bb solo-factor advance ${item.key}\` to send the ticket on.`,
             threadId,
           );
         } else {
@@ -1757,13 +1757,13 @@ export class FactoryEngine {
 
   /**
    * Deliver a message between factory threads. `to` is a standing agent id
-   * ("orchestrator"), a ticket key ("APP-12", its current stage), or
+   * ("architect"), a ticket key ("APP-12", its current stage), or
    * "APP-12:build" for a specific stage's thread.
    */
   message(projectId: string, fromThreadId: string | null, to: string, text: string): Promise<string> {
     return this.exclusive(async () => {
       // A standing agent that has not been started yet is started by its
-      // first message, so a scheduled check can always reach the planner.
+      // first message, so a scheduled check can always reach the Architect.
       const agentId = to.trim();
       if (
         this.store.getConfig(projectId).agents[agentId] !== undefined &&
@@ -2148,7 +2148,7 @@ export function stageProtocol(item: Item, stageLabel: string, review: boolean, o
       : `- If you think only the founder can decide something, call factory_ask_founder with the situation, the options, and your recommendation, then end your turn. It goes to this ticket's issue owner, who either answers it or takes it to the founder. The answer arrives here as a message.`,
     owner
       ? ""
-      : `- If your project's process says something goes back to the planner, call factory_ask_planner with the full handoff. For this ticket that is its issue owner, the agent that reviewed its plan; its answer arrives here as a message, and you may go back and forth as often as needed.`,
+      : `- If a question, a blocker or a problem with the plan needs someone who holds the plan, call factory_ask_owner with the full handoff. It goes to this ticket's issue owner, the agent that reviewed its plan; its answer arrives here as a message, and you may go back and forth as often as needed.`,
     `- If you cannot proceed for any other reason, call factory_stage_done with outcome "blocked" and say why.`,
     `- To talk to another agent, call factory_message.`,
     `Do not start the next stage yourself and do not launch your own reviewer: the factory does both.`,

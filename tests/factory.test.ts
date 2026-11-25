@@ -45,7 +45,7 @@ function setup() {
   const lastTurn = new Map<string, "user" | "agent" | "plugin">();
   const host = createFakePluginHost({
     pluginId: "solo-factor",
-    agentSkillIds: ["factory", "factory-orchestrator", "factory-issue-owner", "factory-deploy", "factory-harness-improver", "factory-watch", "factory-cleaner", "factory-integrator", "factory-contacts", "factory-onboarding", "factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship", "factory-tracker", "factory-sequence"],
+    agentSkillIds: ["solo-factor", "factory-architect", "factory-issue-owner", "factory-deployer", "factory-mechanic", "factory-observer", "factory-cleaner", "factory-integrator", "factory-contacts", "factory-onboarding", "factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship", "factory-tracker", "factory-sequence"],
     sdk: {
       projects: {
         list: async () => [{ id: PROJECT, name: "Acme" }],
@@ -333,15 +333,15 @@ describe("pipeline handoffs", () => {
   });
 
   it("returns findings to the thread that queued the ticket when the pipeline has no author stage", async () => {
-    const orchestrator = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
-    await t.tool("factory_enqueue", orchestrator.threadId, { key: "APP-1", title: "Rest days", lane: "Checkout", pipeline: "planned" });
+    const architect = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
+    await t.tool("factory_enqueue", architect.threadId, { key: "APP-1", title: "Rest days", lane: "Checkout", pipeline: "planned" });
     await t.tool("factory_stage_done", "th_2", { outcome: "changes_requested", change_note: NOTE, summary: "Plan misses migration." });
 
-    expect(t.sent.at(-1)!.threadId).toBe(orchestrator.threadId);
-    expect(t.sent.at(-1)!.text).toContain("bb factory advance APP-1");
+    expect(t.sent.at(-1)!.threadId).toBe(architect.threadId);
+    expect(t.sent.at(-1)!.text).toContain("bb solo-factor advance APP-1");
     expect((await t.item("APP-1")).status).toBe("returned");
 
-    const cli = await t.harness.behavior.runCli(["advance", "APP-1"], { projectId: PROJECT, threadId: orchestrator.threadId });
+    const cli = await t.harness.behavior.runCli(["advance", "APP-1"], { projectId: PROJECT, threadId: architect.threadId });
     expect(cli.exitCode).toBe(0);
     expect(t.spawned.at(-1)!.title).toBe("Execution");
   });
@@ -372,7 +372,7 @@ describe("a ticket's issue owner fields everything about it", () => {
 
   it("sends the builder's question to the owner, and resumes on its reply", async () => {
     await start();
-    const asked = await t.tool("factory_ask_planner", "th_2", { question: "PLANNER INPUT REQUIRED: the replay contract cannot requalify." });
+    const asked = await t.tool("factory_ask_owner", "th_2", { question: "PLANNER INPUT REQUIRED: the replay contract cannot requalify." });
     expect(asked).toContain("issue owner");
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_1", senderThreadId: "th_2" });
     expect(t.sent.at(-1)!.text).toContain("the replay contract cannot requalify");
@@ -390,7 +390,7 @@ describe("a ticket's issue owner fields everything about it", () => {
     expect((await t.item("APP-1")).status).toBe("running");
 
     // Round two works the same way, and the build then finishes normally.
-    await t.tool("factory_ask_planner", "th_2", { question: "One more: which fixture?" });
+    await t.tool("factory_ask_owner", "th_2", { question: "One more: which fixture?" });
     await t.tool("factory_message", "th_1", { to: "APP-1", message: "The hand-log one." });
     await t.tool("factory_stage_done", "th_2", { outcome: "complete", change_note: NOTE, summary: "Built." });
     expect(t.spawned.at(-1)!.title).toBe("Code review");
@@ -490,7 +490,7 @@ describe("a ticket's issue owner fields everything about it", () => {
 
   it("reminds an owner that goes quiet, then tells the founder", async () => {
     await start();
-    await t.tool("factory_ask_planner", "th_2", { question: "Blocked on X." });
+    await t.tool("factory_ask_owner", "th_2", { question: "Blocked on X." });
     await t.emit("thread.idle", "th_1", { lastAssistantText: "Thinking." });
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_1" });
     expect(t.sent.at(-1)!.text).toContain("still waiting on you");
@@ -501,7 +501,7 @@ describe("a ticket's issue owner fields everything about it", () => {
   it("starts an owner for a ticket whose plan was reviewed elsewhere, the first time one is needed", async () => {
     await t.enqueue("APP-9", "Checkout", "reviewed");
     expect(t.spawned).toHaveLength(1);
-    await t.tool("factory_ask_planner", "th_1", { question: "Blocked." });
+    await t.tool("factory_ask_owner", "th_1", { question: "Blocked." });
     expect(t.spawned.at(-1)).toMatchObject({ id: "th_2", title: "Issue owner", environment: { type: "reuse", environmentId: "env_th_1" } });
     expect(t.spawned.at(-1)!.prompt).toContain("Its plan was reviewed before it reached the factory");
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_2", senderThreadId: "th_1" });
@@ -516,13 +516,13 @@ describe("a ticket's issue owner fields everything about it", () => {
     await start();
     expect(await t.tool("factory_ticket_note", "th_2", { note: "Mine." })).toContain("Only a ticket's issue owner");
     await t.tool("factory_ticket_note", "th_1", { note: "Founder wants missed, not rest. Open: copy for the banner." });
-    await t.tool("factory_ask_planner", "th_2", { question: "Which copy?" });
+    await t.tool("factory_ask_owner", "th_2", { question: "Which copy?" });
     expect(t.sent.at(-1)!.text).toContain("Your ticket note for APP-1:\nFounder wants missed, not rest. Open: copy for the banner.");
   });
 
   it("clears an inbox entry when the founder answers in the thread instead", async () => {
     await start();
-    await t.tool("factory_ask_planner", "th_2", { question: "Which copy?" });
+    await t.tool("factory_ask_owner", "th_2", { question: "Which copy?" });
     await t.tool("factory_ask_founder", "th_1", { kind: "decision", question: "Banner copy A or B?" });
     expect((await t.state()).inbox).toHaveLength(1);
     await t.founderTypes("th_2");
@@ -545,7 +545,7 @@ describe("a ticket's issue owner fields everything about it", () => {
   });
 
   it("keeps a standing agent's questions open when they write about something else, closes one they replie to, and lets the agent close its own", async () => {
-    await t.harness.behavior.runCli(["prompt", "orchestrator", "Morning."], { projectId: PROJECT });
+    await t.harness.behavior.runCli(["prompt", "architect", "Morning."], { projectId: PROJECT });
     const agent = t.spawned.at(-1)!.id;
     const ask = (question: string) => t.tool("factory_ask_founder", agent, { kind: "decision", question, options: ["A", "B"] });
     expect(await ask("Ship A or B?")).toMatch(/Asked \(inb_/);
@@ -626,7 +626,7 @@ describe("a ticket's issue owner fields everything about it", () => {
       makePluginAgentConfigurationContext({ pluginMetadata: { binding: { kind: "stage", itemId: "itm_1", stage: "build" } } } as never),
     );
     const tools = (config?.tools ?? []).map((tool: { name: string }) => tool.name);
-    expect(tools).toContain("factory_ask_planner");
+    expect(tools).toContain("factory_ask_owner");
     expect(tools).toContain("factory_ticket_note");
   });
 });
@@ -686,7 +686,7 @@ describe("small bugs ride with a planned ticket", () => {
 describe("founder inbox", () => {
   it("signals open windows to chime when something lands in the inbox", async () => {
     const arrivals = () => t.harness.inspection.realtimeSignals.filter((signal) => signal.channel === "factory-inbox-arrived").length;
-    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
     expect(arrivals()).toBe(0);
     await t.tool("factory_ask_founder", planner.threadId, { kind: "decision", question: "Create a ticket?" });
     expect(arrivals()).toBe(1);
@@ -739,7 +739,7 @@ describe("founder inbox", () => {
   });
 
   it("sends the files the founder attached to an answer along with it, and lets a file be the whole answer", async () => {
-    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
     await t.tool("factory_ask_founder", planner.threadId, { kind: "todo", question: "Record the menu on your phone" });
     const entry = (await t.state()).inbox[0]!;
     const video = { type: "localFile", path: "uploads/menu.mov", name: "menu.mov", mimeType: "video/quicktime", sizeBytes: 1200 };
@@ -755,7 +755,7 @@ describe("founder inbox", () => {
   });
 
   it("lets a standing agent ask the founder directly", async () => {
-    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+    const planner = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
     await t.tool("factory_ask_founder", planner.threadId, { kind: "decision", question: "Create a ticket for the new error class?" });
     expect((await t.state()).inbox[0]).toMatchObject({ kind: "question", from: "Architect" });
   });
@@ -836,8 +836,8 @@ describe("founder inbox", () => {
 
 describe("standing agents and messaging", () => {
   it("starts an agent once, unpinned, in the main checkout, on its role's model", async () => {
-    const first = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
-    const second = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+    const first = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
+    const second = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
 
     expect(second.threadId).toBe(first.threadId);
     expect(t.spawned).toHaveLength(1);
@@ -845,30 +845,30 @@ describe("standing agents and messaging", () => {
       pinned: false,
       environment: { type: "host", hostId: "host_local", workspace: { type: "unmanaged", path: null } },
     });
-    expect(t.spawned[0]!.prompt).toContain("factory-orchestrator");
-    expect(t.spawned[0]!.prompt).toContain("docs/agents/orchestrator/MEMORY.md");
+    expect(t.spawned[0]!.prompt).toContain("factory-architect");
+    expect(t.spawned[0]!.prompt).toContain("docs/agents/architect/MEMORY.md");
   });
 
   it("rotates an agent: the old thread writes its memory, then a fresh thread takes over", async () => {
-    const first = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
-    await t.rpc("rotateAgent", { projectId: PROJECT, agentId: "orchestrator" });
-    expect(t.sent.at(-1)!.text).toContain("docs/agents/orchestrator/MEMORY.md");
+    const first = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
+    await t.rpc("rotateAgent", { projectId: PROJECT, agentId: "architect" });
+    expect(t.sent.at(-1)!.text).toContain("docs/agents/architect/MEMORY.md");
     expect(t.spawned).toHaveLength(1);
 
     await t.emit("thread.idle", first.threadId, { lastAssistantText: "Memory updated." });
     expect(t.spawned).toHaveLength(2);
-    const agent = (await t.state()).agents.find((state) => state.agentId === "orchestrator")!;
+    const agent = (await t.state()).agents.find((state) => state.agentId === "architect")!;
     expect(agent).toMatchObject({ threadId: "th_2", rotating: false });
   });
 
   it("lets a scheduled prompt start a standing agent and reuse its thread afterwards", async () => {
-    const first = await t.harness.behavior.runCli(["prompt", "watch", "Daily", "check."], { projectId: PROJECT });
+    const first = await t.harness.behavior.runCli(["prompt", "observer", "Daily", "check."], { projectId: PROJECT });
     expect(first.exitCode).toBe(0);
     expect(t.spawned).toHaveLength(1);
-    expect(t.spawned[0]!.prompt).toContain("factory-watch");
+    expect(t.spawned[0]!.prompt).toContain("factory-observer");
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_1", text: "Daily check." });
 
-    await t.harness.behavior.runCli(["prompt", "watch", "Again."], { projectId: PROJECT });
+    await t.harness.behavior.runCli(["prompt", "observer", "Again."], { projectId: PROJECT });
     expect(t.spawned).toHaveLength(1);
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_1", text: "Again." });
   });
@@ -879,7 +879,7 @@ describe("standing agents and messaging", () => {
     const { cleaner: _role, integrator: _integratorRole, ...roles } = config.roles;
     await t.rpc("saveConfig", {
       projectId: PROJECT,
-      config: { ...config, roles, agents: { ...agents, orchestrator: { ...agents.orchestrator!, memoryPath: "/vault/Factory agents/Orchestrator memory.md" } } },
+      config: { ...config, roles, agents: { ...agents, architect: { ...agents.architect!, memoryPath: "/vault/Factory agents/Orchestrator memory.md" } } },
     });
     const upgraded = (await t.state()).config;
     expect(upgraded.agents.cleaner).toMatchObject({ label: "Cleaner", role: "cleaner", skill: "factory-cleaner", memoryPath: "/vault/Factory agents/Cleaner memory.md" });
@@ -897,7 +897,7 @@ describe("standing agents and messaging", () => {
 
   it("lets an outside service wake a standing agent through the inbound hook", async () => {
     const response = await t.harness.behavior.fetchHttp("POST", "/prompt", {
-      body: JSON.stringify({ projectId: PROJECT, agent: "watch", text: "New feedback row 123" }),
+      body: JSON.stringify({ projectId: PROJECT, agent: "observer", text: "New feedback row 123" }),
       headers: { "content-type": "application/json" },
     });
     expect(response.status).toBe(200);
@@ -912,15 +912,15 @@ describe("standing agents and messaging", () => {
     expect(unknown.status).toBe(400);
 
     const malformed = await t.harness.behavior.fetchHttp("POST", "/prompt", {
-      body: JSON.stringify({ agent: "watch" }),
+      body: JSON.stringify({ agent: "observer" }),
       headers: { "content-type": "application/json" },
     });
     expect(malformed.status).toBe(400);
   });
 
   it("starts the Architect when the Observer hands it findings before it was ever started", async () => {
-    await t.harness.behavior.runCli(["prompt", "watch", "Daily check."], { projectId: PROJECT });
-    const result = await t.tool("factory_message", "th_1", { to: "orchestrator", message: "Two new error classes." });
+    await t.harness.behavior.runCli(["prompt", "observer", "Daily check."], { projectId: PROJECT });
+    const result = await t.tool("factory_message", "th_1", { to: "architect", message: "Two new error classes." });
     expect(result).toContain("Delivered to Architect");
     expect(t.spawned.map((thread) => thread.title)).toEqual(["Observer", "Architect"]);
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_2", senderThreadId: "th_1" });
@@ -929,28 +929,28 @@ describe("standing agents and messaging", () => {
 
   it("offers a deployer as a standing agent with its own model and charter", async () => {
     const { config } = await t.state();
-    expect(config.agents.deploy).toMatchObject({ label: "Deployer", role: "deploy", skill: "factory-deploy" });
-    await t.rpc("saveConfig", { projectId: PROJECT, config: { ...config, roles: { ...config.roles, deploy: { ...config.roles.deploy, providerId: "codex", model: "gpt-luna" } } } });
-    await t.rpc("startAgent", { projectId: PROJECT, agentId: "deploy" });
+    expect(config.agents.deployer).toMatchObject({ label: "Deployer", role: "deployer", skill: "factory-deployer" });
+    await t.rpc("saveConfig", { projectId: PROJECT, config: { ...config, roles: { ...config.roles, deployer: { ...config.roles.deployer, providerId: "codex", model: "gpt-luna" } } } });
+    await t.rpc("startAgent", { projectId: PROJECT, agentId: "deployer" });
     expect(t.spawned.at(-1)).toMatchObject({ title: "Deployer", providerId: "codex", model: "gpt-luna", pinned: false });
-    expect(t.spawned.at(-1)!.prompt).toContain("factory-deploy");
+    expect(t.spawned.at(-1)!.prompt).toContain("factory-deployer");
   });
 
-  it("delivers messages between a worker and the orchestrator", async () => {
-    const orchestrator = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+  it("delivers messages between a worker and the architect", async () => {
+    const architect = await t.rpc<{ threadId: string }>("startAgent", { projectId: PROJECT, agentId: "architect" });
     await t.enqueue("APP-1", "Checkout", "reviewed");
-    await t.tool("factory_message", "th_2", { to: "orchestrator", message: "Plan and code disagree on units." });
-    expect(t.sent.at(-1)).toMatchObject({ threadId: orchestrator.threadId, senderThreadId: "th_2" });
+    await t.tool("factory_message", "th_2", { to: "architect", message: "Plan and code disagree on units." });
+    expect(t.sent.at(-1)).toMatchObject({ threadId: architect.threadId, senderThreadId: "th_2" });
     expect(t.sent.at(-1)!.text).toContain("Message from Execution for APP-1");
 
-    await t.tool("factory_message", orchestrator.threadId, { to: "APP-1", message: "Use miles." });
+    await t.tool("factory_message", architect.threadId, { to: "APP-1", message: "Use miles." });
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_2" });
   });
 
   it("lets a side thread talk with a standing agent, and the agent answer it", async () => {
-    await t.harness.behavior.runCli(["prompt", "orchestrator", "Morning."], { projectId: PROJECT });
+    await t.harness.behavior.runCli(["prompt", "architect", "Morning."], { projectId: PROJECT });
     const architect = t.spawned.at(-1)!.id;
-    await t.tool("factory_message", "thr_side1", { to: "orchestrator", message: "The founder wants your view on this proposal." });
+    await t.tool("factory_message", "thr_side1", { to: "architect", message: "The founder wants your view on this proposal." });
     expect(t.sent.at(-1)).toMatchObject({ threadId: architect });
     expect(t.sent.at(-1)!.text).toContain('reply with factory_message to "thr_side1"');
     await t.tool("factory_message", architect, { to: "thr_side1", message: "Agreed on the first two; not the third." });
@@ -968,12 +968,12 @@ describe("standing agents and messaging", () => {
     expect(names(outsider?.tools)).toEqual([]);
 
     const worker = await configure({ binding: { kind: "stage", itemId: "itm_1", stage: "build" } });
-    expect(names(worker?.tools)).toEqual(["factory_stage_done", "factory_ask_founder", "factory_ask_planner", "factory_check_images", "factory_ticket_note", "factory_follow_up", "factory_message"]);
+    expect(names(worker?.tools)).toEqual(["factory_stage_done", "factory_ask_founder", "factory_ask_owner", "factory_check_images", "factory_ticket_note", "factory_follow_up", "factory_message"]);
     expect(JSON.stringify(worker?.skills)).toContain("factory-issue-owner");
 
-    const orchestrator = await configure({ binding: { kind: "agent", agentId: "orchestrator", projectId: PROJECT } });
-    expect(names(orchestrator?.tools)).toContain("factory_enqueue");
-    expect(JSON.stringify(orchestrator?.skills)).toContain("factory-orchestrator");
+    const architect = await configure({ binding: { kind: "agent", agentId: "architect", projectId: PROJECT } });
+    expect(names(architect?.tools)).toContain("factory_enqueue");
+    expect(JSON.stringify(architect?.skills)).toContain("factory-architect");
   });
 });
 
@@ -1241,7 +1241,7 @@ describe("the founder tries a visible change before it ships", () => {
     const board = (await t.state()).items.filter((item) => item.status !== "archived");
     expect(board.map((item) => [item.key, item.status, item.pipeline])).toEqual([["APP-20", "running", "reviewed"]]);
     // The same thread owns the new ticket: the builder's questions come to it.
-    await t.tool("factory_ask_planner", "th_5", { question: "Which names?" });
+    await t.tool("factory_ask_owner", "th_5", { question: "Which names?" });
     expect(t.sent.at(-1)).toMatchObject({ threadId: "th_1", senderThreadId: "th_5" });
     expect((await t.item("APP-20")).status).toBe("with-owner");
   });
@@ -1530,15 +1530,15 @@ describe("falling back when a model's limit runs out", () => {
         ...config,
         roles: {
           ...config.roles,
-          orchestrator: { ...config.roles.orchestrator, providerId: "claude-code", model: "claude-opus-5-5", fallbackProviderId: "codex", fallbackModel: "gpt-sol" },
+          architect: { ...config.roles.architect, providerId: "claude-code", model: "claude-opus-5-5", fallbackProviderId: "codex", fallbackModel: "gpt-sol" },
         },
       },
     });
-    await t.rpc("startAgent", { projectId: PROJECT, agentId: "orchestrator" });
+    await t.rpc("startAgent", { projectId: PROJECT, agentId: "architect" });
     await limit("th_1");
     expect(t.spawned.at(-1)).toMatchObject({ id: "th_2", title: "Architect", providerId: "codex", model: "gpt-sol", pinned: false });
     expect(t.spawned.at(-1)!.prompt).toContain("bb thread log th_1");
-    expect((await t.state()).agents.find((agent) => agent.agentId === "orchestrator")!.threadId).toBe("th_2");
+    expect((await t.state()).agents.find((agent) => agent.agentId === "architect")!.threadId).toBe("th_2");
   });
 
   it("leaves a role with no fallback alone", async () => {
@@ -1577,10 +1577,10 @@ describe("configuration and CLI", () => {
     expect(JSON.stringify(stage?.skills)).toContain("factory-build");
     expect(JSON.stringify(stage?.skills)).not.toContain("factory-onboarding");
     const agent = await t.harness.behavior.resolveAgentConfiguration(
-      makePluginAgentConfigurationContext({ pluginMetadata: { binding: { kind: "agent", agentId: "harness-improver", projectId: PROJECT } } } as never),
+      makePluginAgentConfigurationContext({ pluginMetadata: { binding: { kind: "agent", agentId: "mechanic", projectId: PROJECT } } } as never),
     );
     expect(JSON.stringify(stage?.skills)).not.toContain("factory-sequence");
-    for (const skill of ["factory-harness-improver", "factory-onboarding", "factory-plan", "factory-sequence", "factory-tracker"]) expect(JSON.stringify(agent?.skills)).toContain(skill);
+    for (const skill of ["factory-mechanic", "factory-onboarding", "factory-plan", "factory-sequence", "factory-tracker"]) expect(JSON.stringify(agent?.skills)).toContain(skill);
   });
 
   it("gives a configuration saved before builder tiers existed tier 2 and 3 builders copied from its builder", async () => {
@@ -1621,30 +1621,30 @@ describe("configuration and CLI", () => {
     const { config } = await t.state();
     const old = {
       ...config,
-      roles: { ...config.roles, orchestrator: { ...config.roles.orchestrator, label: "Planner / strategist" }, watch: { ...config.roles.watch, label: "Night watch" } },
-      agents: { ...config.agents, orchestrator: { ...config.agents.orchestrator, label: "Planner / strategist" }, watch: { ...config.agents.watch, label: "Watch" } },
+      roles: { ...config.roles, architect: { ...config.roles.architect, label: "Planner / strategist" }, observer: { ...config.roles.observer, label: "Night watch" } },
+      agents: { ...config.agents, architect: { ...config.agents.architect, label: "Planner / strategist" }, observer: { ...config.agents.observer, label: "Watch" } },
     };
     await t.rpc("saveConfig", { projectId: PROJECT, config: old });
     const upgraded = (await t.state()).config;
-    expect(upgraded.roles.orchestrator!.label).toBe("Architect");
-    expect(upgraded.agents.orchestrator!.label).toBe("Architect");
-    expect(upgraded.agents.watch!.label).toBe("Observer");
-    expect(upgraded.roles.watch!.label).toBe("Night watch");
+    expect(upgraded.roles.architect!.label).toBe("Architect");
+    expect(upgraded.agents.architect!.label).toBe("Architect");
+    expect(upgraded.agents.observer!.label).toBe("Observer");
+    expect(upgraded.roles.observer!.label).toBe("Night watch");
   });
 
-  it("renames the CTO to Architect and the harness improver to Mechanic in a saved configuration", async () => {
+  it("renames the CTO to Architect and the Mechanic to Mechanic in a saved configuration", async () => {
     const { config } = await t.state();
     const old = {
       ...config,
-      roles: { ...config.roles, orchestrator: { ...config.roles.orchestrator, label: "CTO" }, "harness-improver": { ...config.roles["harness-improver"], label: "Harness improver" } },
-      agents: { ...config.agents, orchestrator: { ...config.agents.orchestrator, label: "CTO" }, "harness-improver": { ...config.agents["harness-improver"], label: "Harness improver" } },
+      roles: { ...config.roles, architect: { ...config.roles.architect, label: "CTO" }, "mechanic": { ...config.roles["mechanic"], label: "Harness improver" } },
+      agents: { ...config.agents, architect: { ...config.agents.architect, label: "CTO" }, "mechanic": { ...config.agents["mechanic"], label: "Harness improver" } },
     };
     await t.rpc("saveConfig", { projectId: PROJECT, config: old });
     const upgraded = (await t.state()).config;
-    expect(upgraded.roles.orchestrator!.label).toBe("Architect");
-    expect(upgraded.agents.orchestrator!.label).toBe("Architect");
-    expect(upgraded.roles["harness-improver"]!.label).toBe("Mechanic");
-    expect(upgraded.agents["harness-improver"]!.label).toBe("Mechanic");
+    expect(upgraded.roles.architect!.label).toBe("Architect");
+    expect(upgraded.agents.architect!.label).toBe("Architect");
+    expect(upgraded.roles["mechanic"]!.label).toBe("Mechanic");
+    expect(upgraded.agents["mechanic"]!.label).toBe("Mechanic");
   });
 
   it("rejects a configuration whose stage names an undefined role", async () => {

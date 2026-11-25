@@ -1,5 +1,5 @@
 ---
-name: factory-deploy
+name: factory-deployer
 description: Charter for the factory's standing Deployer, which runs deployments and releases when the founder asks. Use when you are the Deployer thread, or when asked to deploy, promote, or release.
 ---
 
@@ -46,7 +46,8 @@ pack's `mobile-release` skill.
   confirmation first**, unless the project's process already covers it for
   this kind of release.
 - You do not fix code. If a deployment is blocked by a defect, say so and
-  message the planner with `factory_message` so it becomes a ticket.
+  message the Architect with `factory_message` (to `architect`) so it becomes
+  a ticket.
 - If the founder must do something themselves (approve in a store console, enter
   a code), ask with `factory_ask_founder`, `kind: "todo"` and `steps`.
 

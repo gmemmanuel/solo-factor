@@ -2,12 +2,12 @@
 // pipeline. Stage prompts name a skill and nothing else. The defaults name the
 // process skills bundled in `skills/` (factory-plan, factory-build, …), which
 // read the project's FACTORY.md for everything project-specific. A project
-// with its own skills points a stage at them with `bb factory stage`.
+// with its own skills points a stage at them with `bb solo-factor stage`.
 import type { Config } from "./model.js";
 
 export const DEFAULT_CONFIG: Config = {
   roles: {
-    orchestrator: {
+    architect: {
       label: "Architect",
       providerId: "",
       model: "",
@@ -97,7 +97,7 @@ export const DEFAULT_CONFIG: Config = {
       fallbackModel: "",
       fallbackReasoningLevel: "",
     },
-    deploy: {
+    deployer: {
       label: "Deployer",
       providerId: "",
       model: "",
@@ -107,7 +107,7 @@ export const DEFAULT_CONFIG: Config = {
       fallbackModel: "",
       fallbackReasoningLevel: "",
     },
-    watch: {
+    observer: {
       label: "Observer",
       providerId: "",
       model: "",
@@ -117,7 +117,7 @@ export const DEFAULT_CONFIG: Config = {
       fallbackModel: "",
       fallbackReasoningLevel: "",
     },
-    "harness-improver": {
+    "mechanic": {
       label: "Mechanic",
       providerId: "",
       model: "",
@@ -151,7 +151,7 @@ export const DEFAULT_CONFIG: Config = {
   stages: {
     plan: {
       label: "Plan",
-      role: "orchestrator",
+      role: "architect",
       review: false,
       owner: false,
       founderGate: false,
@@ -222,29 +222,29 @@ export const DEFAULT_CONFIG: Config = {
   agentOrder: [],
   maxActiveItems: 8,
   agents: {
-    orchestrator: {
+    architect: {
       label: "Architect",
-      role: "orchestrator",
-      skill: "factory-orchestrator",
-      memoryPath: "docs/agents/orchestrator/MEMORY.md",
+      role: "architect",
+      skill: "factory-architect",
+      memoryPath: "docs/agents/architect/MEMORY.md",
     },
-    deploy: {
+    deployer: {
       label: "Deployer",
-      role: "deploy",
-      skill: "factory-deploy",
-      memoryPath: "docs/agents/deploy/MEMORY.md",
+      role: "deployer",
+      skill: "factory-deployer",
+      memoryPath: "docs/agents/deployer/MEMORY.md",
     },
-    watch: {
+    observer: {
       label: "Observer",
-      role: "watch",
-      skill: "factory-watch",
-      memoryPath: "docs/agents/watch/MEMORY.md",
+      role: "observer",
+      skill: "factory-observer",
+      memoryPath: "docs/agents/observer/MEMORY.md",
     },
-    "harness-improver": {
+    "mechanic": {
       label: "Mechanic",
-      role: "harness-improver",
-      skill: "factory-harness-improver",
-      memoryPath: "docs/agents/harness-improver/MEMORY.md",
+      role: "mechanic",
+      skill: "factory-mechanic",
+      memoryPath: "docs/agents/mechanic/MEMORY.md",
     },
     cleaner: {
       label: "Cleaner",

@@ -1,8 +1,12 @@
-# Factory
+# Solo Factor
 
 <p align="center"><img src="docs/assets/factory.svg" alt="Tickets ride a conveyor belt through five stations: plan review, build, code review, you try it, and ship. Each leaves merged." width="100%"></p>
 
+> I outgrew Conductor and the labs' own desktop apps. Optimizing for the
+> solo factor, on bb, was the obvious next step.
+
 **A software factory for a solo founder, as a [bb](https://getbb.app) plugin.**
+The solo factor is the one thing that does not scale: your attention.
 Tickets move through plan, plan review, build, code review and ship without
 you carrying them from agent to agent. Every stage is a fresh agent on the
 model you chose for that role. You are asked only for product decisions, in
@@ -67,6 +71,19 @@ Everything here exists because something went wrong without it.
   previews without a device, performance and gesture guidance for React
   Native / Expo apps, in [`packs/mobile`](packs/mobile/).
 
+## How a ticket moves
+
+[![One ticket moving through the factory: the Observer notices a double-applied coupon, the Architect plans it, a swimlane builds it, you make one decision and try it, and it ships.](docs/assets/flow.gif)](https://gmemmanuel.github.io/solo-factor/)
+
+Six agents touch the ticket. You are needed twice. [Step through it yourself.](https://gmemmanuel.github.io/solo-factor/)
+(A coded sketch with sample data, not a recording.)
+
+The real pages, with the same sample project:
+
+| Inbox: one decision, one thing to try | Swimlanes: what runs, what waits, what merged |
+|---|---|
+| ![The Inbox page: a decision from the Architect and a ticket waiting for the founder to try, with its before and after image and an Approve and ship button.](docs/assets/screen-inbox.png) | ![The Swimlanes page: three lanes, a ticket waiting for the founder, queued tickets with their tiers, and a merged ticket with a What changed button.](docs/assets/screen-swimlanes.png) |
+
 ## Quick start
 
 Needs bb 0.49 or later, a git project, and at least one agent provider
@@ -83,10 +100,10 @@ npm install
 bb plugin install .
 ```
 
-Open **Factory** in bb's navigation rail and pick your project.
+Three pages appear in bb's navigation rail: **Inbox**, **Swimlanes** and **Agents**. Pick your project.
 
-**2. Start the Mechanic.** Factory → Agents → Mechanic → Start (or
-`bb factory agent start harness-improver`). Tell it:
+**2. Start the Mechanic.** Agents → Mechanic → Start (or
+`bb solo-factor agent start mechanic`). Tell it:
 
 > I'm new to the factory. Set it up for this project.
 
@@ -168,18 +185,18 @@ them into your project; they are yours to change.
 ## For agents and scripts
 
 Factory threads get native tools (`factory_stage_done`, `factory_ask_founder`,
-`factory_ask_planner`, `factory_message`, and for standing agents
+`factory_ask_owner`, `factory_message`, and for standing agents
 `factory_enqueue` and `factory_status`). Everything is also on the command
 line:
 
 ```sh
-bb factory status
-bb factory enqueue APP-12 "Coupon applies twice" --lane Checkout --pipeline planned --tier 1
-bb factory role ship --provider codex --model <model-id> --reasoning low
-bb factory stage plan --prompt 'Use the `my-plan` skill to plan {key}: {title}.\n\n{brief}'
-bb factory prompt watch "Run the daily review."     # for scheduled automations
-bb factory inbox
-bb factory help
+bb solo-factor status
+bb solo-factor enqueue APP-12 "Coupon applies twice" --lane Checkout --pipeline planned --tier 1
+bb solo-factor role ship --provider codex --model <model-id> --reasoning low
+bb solo-factor stage plan --prompt 'Use the `my-plan` skill to plan {key}: {title}.\n\n{brief}'
+bb solo-factor prompt observer "Run the daily review."     # for scheduled automations
+bb solo-factor inbox
+bb solo-factor help
 ```
 
 | Pipeline | Stages | Use for |
@@ -200,7 +217,7 @@ bb project.
   who wants it to.
 - **A reference UI preview harness** for the mobile pack, so the founder's
   before/after image works on day one.
-- **`bb factory init`**: the mechanical half of onboarding in one command.
+- **`bb solo-factor init`**: the mechanical half of onboarding in one command.
 - **More than one decision-maker.**
 
 ## Works well with

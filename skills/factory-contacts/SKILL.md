@@ -13,11 +13,11 @@ you can talk to them.
 
 | Agent | Address | Ask it about |
 |---|---|---|
-| Architect | `orchestrator` | what gets built and in what order; turning an idea into a ticket and plan; anything about the product picture |
-| Observer | `watch` | what real users did; errors, traces and checks on shipped changes |
-| Deployer | `deploy` | releases to testers |
+| Architect | `architect` | what gets built and in what order; turning an idea into a ticket and plan; anything about the product picture |
+| Observer | `observer` | what real users did; errors, traces and checks on shipped changes |
+| Deployer | `deployer` | releases to testers |
 | Integrator | `integrator` | dependencies, SDKs and tool updates |
-| Mechanic | `harness-improver` | the factory itself, skills and checks |
+| Mechanic | `mechanic` | the factory itself, skills and checks |
 | Cleaner | `cleaner` | disk space, memory and the computer |
 
 A ticket's own threads are addressed `APP-123` (its issue owner) or
@@ -26,7 +26,7 @@ A ticket's own threads are addressed `APP-123` (its issue owner) or
 ## How
 
 - Send a message with the `factory_message` tool (`to`: an address above), or
-  from a shell: `bb factory message <address> "<text>"`.
+  from a shell: `bb solo-factor message <address> "<text>"`.
 - Write it so it stands alone: the agent has not seen this thread. Say who is
   asking (the founder, through this thread), what you need, and anything it
   must not repeat.
@@ -36,7 +36,7 @@ A ticket's own threads are addressed `APP-123` (its issue owner) or
   asked for nothing.
 - When the founder asks you to have a back-and-forth with an agent, keep it
   going yourself until the question is settled, then tell them the outcome.
-- `factory_status` (or `bb factory status`) shows the lanes, tickets and the
+- `factory_status` (or `bb solo-factor status`) shows the lanes, tickets and the
   founder's inbox.
 
 Do not queue tickets, change plans or approve anything on the founder's

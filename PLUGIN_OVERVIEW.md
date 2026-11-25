@@ -2,7 +2,7 @@ Run tickets through a pipeline of independent agents, in swimlanes, and get aske
 
 ## What you get
 
-- A **Factory** page: your inbox, the swimlanes, standing agents, and who plays each role.
+- Three pages in the navigation rail: **Inbox**, **Swimlanes** and **Agents**, plus settings for who plays each role.
 - Swimlanes that work one ticket at a time per lane and run lanes side by side, up to a limit you set.
 - A pipeline where every stage is a fresh thread in the ticket's own worktree, on the model chosen for that role.
 - An inbox for founder decisions, stalls and failures. Answers go back to the thread that asked.
@@ -15,7 +15,7 @@ Start the Mechanic and ask it to set the factory up: it reads your project and w
 
 ## For agents
 
-Factory threads get `factory_stage_done`, `factory_ask_founder`, `factory_ask_planner` and `factory_message`; standing agents also get `factory_enqueue` and `factory_status`. Everything is also available as `bb factory`. The bundled `factory` skill explains the protocol.
+Factory threads get `factory_stage_done`, `factory_ask_founder`, `factory_ask_owner` and `factory_message`; standing agents also get `factory_enqueue` and `factory_status`. Everything is also available as `bb solo-factor`. Scripts installed into your project enforce the rules that matter: which plan belongs to a branch, that a review covers the exact commit being shipped, and whose turn it is to merge. The bundled `factory` skill explains the protocol.
 
 ## Requirements
 

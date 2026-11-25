@@ -115,7 +115,7 @@ export function bbProject(root, config) {
 /** The factory's tickets for this project, or null when bb cannot be asked. */
 export function factoryItems(root, config) {
   const project = bbProject(root, config);
-  const args = ['factory', 'status', '--json', ...(project ? ['--project', project] : [])];
+  const args = ['solo-factor', 'status', '--json', ...(project ? ['--project', project] : [])];
   const result = spawnSync(bbBin(), args, { encoding: 'utf8' });
   if (result.status !== 0) return null;
   try {

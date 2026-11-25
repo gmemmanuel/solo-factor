@@ -111,9 +111,9 @@ and say why in one line.
 Rules for the decision:
 
 - **Their skill wins when it exists and is good.** Point the stage at it:
-  `bb factory stage <stage> --prompt "Use the \`<their-skill>\` skill to …
+  `bb solo-factor stage <stage> --prompt "Use the \`<their-skill>\` skill to …
   {key}: {title}.\n\n{brief}\n\n{previous}"`. Keep the placeholders the
-  default prompt had (`bb factory config` shows them).
+  default prompt had (`bb solo-factor config` shows them).
 - **A bundled skill needs the profile.** It reads `FACTORY.md` for commands,
   paths and rules. Anything the project requires beyond the bundled skill
   goes in that stage's row of "Stage skills", not in a fork of the skill.
@@ -202,9 +202,9 @@ before planning, building, reviewing or shipping. Work in a factory thread
 reports with `factory_stage_done` and never opens its own review.
 ```
 
-Set what you decided: `bb factory role …` for each role, `bb factory stage …`
+Set what you decided: `bb solo-factor role …` for each role, `bb solo-factor stage …`
 for each repointed stage, the ticket link and the ticket limit under
-Factory → Settings.
+the Factory settings page.
 
 ## Step 6: packs
 
@@ -251,8 +251,8 @@ it from `FACTORY.md` alone.
 
 ## Step 8: start the others, and prove it works
 
-1. Tell the founder to start the Architect from Factory → Agents (or run
-   `bb factory agent start orchestrator`), and any other agents they chose.
+1. Tell the founder to start the Architect from the Agents page (or run
+   `bb solo-factor agent start architect`), and any other agents they chose.
    Each reads `FACTORY.md` and runs its own first-run section.
 2. Ask the founder for one small, real change. Have the Architect file,
    plan and queue it. Watch it go through every stage. This first ticket is
@@ -263,7 +263,7 @@ it from `FACTORY.md` alone.
    ```sh
    bb automation create --project <id> --name "Factory retro" \
      --cron "0 9 * * 1" --timezone <IANA zone> \
-     --script 'bb factory prompt harness-improver "Run the weekly retro."'
+     --script 'bb solo-factor prompt mechanic "Run the weekly retro."'
    ```
 
 4. Report to the founder in a few lines: what you set up, what you changed

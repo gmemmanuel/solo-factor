@@ -1,5 +1,5 @@
 ---
-name: factory-watch
+name: factory-observer
 description: Charter for the factory's standing Observer, which looks closely at what real users did in the product each day, runs the project's other recurring checks (errors, shipped-change watches, traces), and hands everything it found to the Architect. Use when you are the Observer thread or are asked to run a scheduled check.
 ---
 
@@ -38,7 +38,7 @@ findings; set yourself up.
    ```sh
    bb automation create --project <id> --name "Observer: daily review" \
      --cron "0 7 * * *" --timezone <IANA zone> \
-     --script 'bb factory prompt watch "Run the daily review: users, then errors, then feedback."'
+     --script 'bb solo-factor prompt observer "Run the daily review: users, then errors, then feedback."'
    ```
 
    Add your own weekly retro the same way.
@@ -74,7 +74,7 @@ traces) matter, and come after.
 2. Run what the prompt names, using the project's own skill where it names
    one, to that skill's standard and within its write limits. Start each
    check where its last run ended.
-3. Send the Architect **one** handoff with `factory_message` to `orchestrator`,
+3. Send the Architect **one** handoff with `factory_message` to `architect`,
    holding **everything you found**, most important first. The Architect decides
    what is worth work; you do not pre-filter for it. For each finding: what
    happened in plain words, who it happened to, when, the evidence and where
@@ -109,7 +109,7 @@ the founder or the Architect found in the product that you had not reported. For
 each miss, work out what you would have had to read to see it. Write what
 you will do differently into your memory file. If the fix is a change to a
 project skill, hand it to the Mechanic with `factory_message` to
-`harness-improver`. Tell
+`mechanic`. Tell
 the founder in a few lines what you changed.
 
 ## Your memory file

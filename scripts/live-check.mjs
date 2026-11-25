@@ -10,7 +10,7 @@
 //   node scripts/live-check.mjs --keep     leave the server up at :38990 to look at
 //
 // The echo model cannot call tools, so the script plays the agent's part by
-// running `bb factory done` / `ask` with that thread's identity. Everything
+// running `bb solo-factor done` / `ask` with that thread's identity. Everything
 // else (threads, worktrees, events, messages, the inbox) is real.
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, cpSync, readdirSync } from "node:fs";
@@ -68,7 +68,7 @@ async function until(read, timeoutMs = 20_000) {
 }
 
 let project = "";
-const status = () => JSON.parse(bb(["factory", "status", "--project", project, "--json"]));
+const status = () => JSON.parse(bb(["solo-factor", "status", "--project", project, "--json"]));
 const ticket = (key) => status().items.find((item) => item.key === key);
 const threads = () => JSON.parse(bb(["thread", "list", "--project", project, "--json"]));
 const as = (threadId) => ({ BB_THREAD_ID: threadId, BB_PROJECT_ID: project });
@@ -169,7 +169,7 @@ async function runButtonChecks(entry, otherThread = null) {
     check("a check shows its before/after screenshot above the steps", loaded === true);
     await page.screenshot({ path: join(work, "page-inbox-open.png") });
     // A green dot on Swimlanes while a ticket is moving: queue one in its own lane, then take it out.
-    bb(["factory", "enqueue", "LIVE-9", "Moving ticket", "--lane", "Dots", "--pipeline", "reviewed", "--project", project]);
+    bb(["solo-factor", "enqueue", "LIVE-9", "Moving ticket", "--lane", "Dots", "--pipeline", "reviewed", "--project", project]);
     // The echo agent ends its turn at once, so the ticket moves only briefly: read the dot when it shows.
     const sawMoving = await page.waitForFunction(() => (document.querySelector('[data-testid="sidebar-navigation-rail"] button[aria-label^="Swimlanes"]')?.getAttribute("aria-label") ?? "").endsWith(" moving"), null, { timeout: 15_000, polling: 100 }).then(() => true, () => false);
     const lanesDot = await page.evaluate(() => {
@@ -179,7 +179,7 @@ async function runButtonChecks(entry, otherThread = null) {
     });
     const movingNow = sawMoving ? 1 : 0;
     check("Swimlanes shows a green dot while a ticket is moving", movingNow > 0 && lanesDot.label.endsWith(" moving") && lanesDot.color === "rgb(16, 185, 129)", JSON.stringify({ movingNow, ...lanesDot }));
-    bb(["factory", "cancel", "LIVE-9", "--project", project]);
+    bb(["solo-factor", "cancel", "LIVE-9", "--project", project]);
     // The reply row reads + | Send back | Dismiss; Run and Open thread sit at the panel's bottom right.
     const panel = page.locator('[data-testid="inbox-panel"]');
     const box = async (selector) => panel.locator(selector).first().boundingBox();
@@ -368,7 +368,7 @@ async function runButtonChecks(entry, otherThread = null) {
 }
 
 /** The founder uses bb on his phone too: every Factory surface at phone width. */
-async function phoneChecks(orchestratorId) {
+async function phoneChecks(architectId) {
   const executablePath = findBrowser();
   if (executablePath === null) {
     check("the Factory pages fit a phone", false, "No Chromium found. Run: npx playwright install chromium");
@@ -410,13 +410,13 @@ async function phoneChecks(orchestratorId) {
     check("on a desktop, What changed opens below bb's page header with nothing over its title", clear);
     // An agent's thread page is reachable and Home is never redirected to Agents
     // (a route-watching redirect once trapped him there).
-    await desk.goto(`http://127.0.0.1:${PORT}/threads/${orchestratorId}`);
+    await desk.goto(`http://127.0.0.1:${PORT}/threads/${architectId}`);
     await desk.waitForTimeout(2500);
     await desk.goto(`http://127.0.0.1:${PORT}/`);
     await desk.waitForTimeout(2500);
     check("Home stays Home after visiting an agent's thread", !desk.url().includes("factory-agents"), desk.url());
     // The Factory's own link to an agent opens the Agents page with that agent marked.
-    await desk.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
+    await desk.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/architect`);
     const marked = await desk.locator('[data-testid="agents-sidebar"] [aria-current="page"]').first().innerText({ timeout: 20_000 }).catch(() => "");
     await desk.screenshot({ path: join(work, "desktop-agent-thread.png") });
     check("the Agents page marks the open agent in its sidebar", marked.includes("Architect"), marked);
@@ -426,25 +426,25 @@ async function phoneChecks(orchestratorId) {
     const lastName = (await rows.last().innerText()).trim();
     await rows.last().dragTo(rows.first());
     const reordered = await until(async () => ((await rows.first().innerText()).trim() === lastName ? true : null), 10_000);
-    const saved = status().items !== undefined ? JSON.parse(bb(["factory", "config", "--project", project])).agentOrder : [];
+    const saved = status().items !== undefined ? JSON.parse(bb(["solo-factor", "config", "--project", project])).agentOrder : [];
     check("dragging an agent in the Agents list reorders it and saves the order", reordered === true && Array.isArray(saved) && saved.length > 0, `${firstBefore} -> ${(await rows.first().innerText()).trim()} | ${JSON.stringify(saved)}`);
     await desk.close();
     await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: join(work, "phone-inbox.png") });
     check("the inbox fits a phone", await fits());
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/architect`);
     const chat = await page.locator('[data-follow-up-composer], textarea, [contenteditable="true"]').first().waitFor({ timeout: 30_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "phone-agents.png") });
     check("the Agents page shows the agent's conversation with a composer on a phone", chat && (await fits()));
     check("on a phone the Agents page has its own row of agents to switch between", (await page.locator('[data-testid="agent-switcher"] button').count()) >= 4);
     // A banner above the thread's composer starts as one line.
-    bb(["factory", "ask", "Open the thread and answer the questions there.", "--todo", "--context", "A long explanation. ".repeat(40)], as(orchestratorId));
+    bb(["solo-factor", "ask", "Open the thread and answer the questions there.", "--todo", "--context", "A long explanation. ".repeat(40)], as(architectId));
     // An agent's question still titles its inbox tile (it has no ticket title).
     await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     const agentTile = page.locator('[data-testid="inbox-tile-question"]').filter({ hasText: "Open the thread and answer the questions there." }).first();
     check("an agent's inbox tile shows its question as the title", await agentTile.waitFor({ timeout: 15_000 }).then(() => true, () => false));
-    await page.goto(`http://127.0.0.1:${PORT}/threads/${orchestratorId}`);
+    await page.goto(`http://127.0.0.1:${PORT}/threads/${architectId}`);
     const banner = page.locator('[data-testid="inbox-banner"]');
     const shown = await banner.waitFor({ timeout: 30_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "phone-banner.png") });
@@ -455,7 +455,7 @@ async function phoneChecks(orchestratorId) {
     await page.screenshot({ path: join(work, "phone-banner-open.png") });
     check("tapping the banner shows the whole entry", opened.includes("A long explanation."));
     // The banner shows above the composer on the Agents page too.
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/architect`);
     const bannerOnAgents = await page.locator('[data-testid="inbox-banner"]').first().waitFor({ timeout: 20_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "phone-agents-banner.png") });
     check("on a phone the Agents page shows the agent's banner above the composer", bannerOnAgents);
@@ -474,8 +474,8 @@ async function phoneChecks(orchestratorId) {
     check("the Reply pill shows the whole question, not cut off", !pillClipped);
     check("Reply on a banner question puts its reply pill, with the whole question, in the composer", composerText.includes("Reply: Open the thread and answer the questions there."), composerText.slice(0, 200));
     // Picking an option on a banner question puts the pill and that option in the composer.
-    bb(["factory", "ask", "Ship the greeting as is?", "--option", "Ship it now.", "--option", "Hold it for copy review."], as(orchestratorId));
-    await page.goto(`http://127.0.0.1:${PORT}/threads/${orchestratorId}`);
+    bb(["solo-factor", "ask", "Ship the greeting as is?", "--option", "Ship it now.", "--option", "Hold it for copy review."], as(architectId));
+    await page.goto(`http://127.0.0.1:${PORT}/threads/${architectId}`);
     const decision = page.locator('[data-testid="inbox-banner"] li').filter({ hasText: "Ship the greeting as is?" }).first();
     await decision.waitFor({ timeout: 20_000 }).catch(() => undefined);
     const options = decision.locator('[data-testid="inbox-banner-option"]');
@@ -492,11 +492,11 @@ async function phoneChecks(orchestratorId) {
     check("picking B on a banner question puts its pill and the option in the composer", optionText.includes("Reply: Ship the greeting as is?") && optionText.includes("B. Hold it for copy review."), optionText.slice(0, 200));
     // A standing agent's question stays open when he writes about something
     // else in its thread; the agent closes it once it is settled.
-    bb(["thread", "tell", orchestratorId, "Something else entirely.", "--mode", "auto"]);
+    bb(["thread", "tell", architectId, "Something else entirely.", "--mode", "auto"]);
     await sleep(3000);
     const stillOpen = status().inbox.find((e) => e.question.startsWith("Open the thread"));
     check("his unrelated message in an agent's thread leaves its question open", Boolean(stillOpen));
-    if (stillOpen) bb(["factory", "close", stillOpen.id], as(orchestratorId));
+    if (stillOpen) bb(["solo-factor", "close", stillOpen.id], as(architectId));
     const cleared = await until(() => (status().inbox.some((e) => e.question.startsWith("Open the thread")) ? null : true));
     check("the agent closes its own question once settled", cleared === true);
   } finally {
@@ -564,26 +564,26 @@ async function main() {
     check("plugin loads on a real bb server", /solo-factor@\S+\s+running/.test(loaded), loaded.slice(0, 400));
 
     project = JSON.parse(bb(["project", "create", "--name", "Live check", "--root", repoDir, "--json"])).id;
-    for (const role of ["orchestrator", "plan-review", "build", "code-review", "ship", "harness-improver"]) {
-      bb(["factory", "role", role, "--provider", "echo-agent", "--model", "echo-1", "--reasoning", "low", "--project", project]);
+    for (const role of ["architect", "plan-review", "build", "code-review", "ship", "mechanic"]) {
+      bb(["solo-factor", "role", role, "--provider", "echo-agent", "--model", "echo-1", "--reasoning", "low", "--project", project]);
     }
 
     // --- standing agent
-    bb(["factory", "agent", "start", "orchestrator", "--project", project]);
-    const orchestrator = await until(() => threads().find((t) => t.title === "Architect"));
-    check("orchestrator starts unpinned: standing agents live on the Agents page", Boolean(orchestrator) && orchestrator.pinnedAt == null);
+    bb(["solo-factor", "agent", "start", "architect", "--project", project]);
+    const architect = await until(() => threads().find((t) => t.title === "Architect"));
+    check("architect starts unpinned: standing agents live on the Agents page", Boolean(architect) && architect.pinnedAt == null);
     const mainEnv = await until(() => threads().find((t) => t.title === "Architect")?.environmentId);
     const environments = bb(["environment", "list", "--project", project]);
     check(
-      "orchestrator runs in the main checkout, not a worktree",
+      "architect runs in the main checkout, not a worktree",
       new RegExp(`${mainEnv}\\s+\\S+\\s+project-checkout`).test(environments),
       environments,
     );
 
     // --- lanes
-    bb(["factory", "enqueue", "LIVE-1", "First in lane", "--lane", "Checkout", "--pipeline", "reviewed", "--project", project], as(orchestrator.id));
-    bb(["factory", "enqueue", "LIVE-2", "Second in lane", "--lane", "Checkout", "--pipeline", "reviewed", "--project", project]);
-    bb(["factory", "enqueue", "LIVE-3", "Other lane", "--lane", "Plan", "--pipeline", "small-bug", "--project", project]);
+    bb(["solo-factor", "enqueue", "LIVE-1", "First in lane", "--lane", "Checkout", "--pipeline", "reviewed", "--project", project], as(architect.id));
+    bb(["solo-factor", "enqueue", "LIVE-2", "Second in lane", "--lane", "Checkout", "--pipeline", "reviewed", "--project", project]);
+    bb(["solo-factor", "enqueue", "LIVE-3", "Other lane", "--lane", "Plan", "--pipeline", "small-bug", "--project", project]);
     check("first ticket in a lane starts", ticket("LIVE-1").status === "running" || ticket("LIVE-1").status === "stalled");
     check("second ticket in the same lane waits", ticket("LIVE-2").status === "queued");
     check("a ticket in another lane starts in parallel", ticket("LIVE-3").status !== "queued");
@@ -606,7 +606,7 @@ async function main() {
     check("the nudge was delivered to the thread", lastMessage(build).includes("You stopped without reporting"));
 
     // --- handoff to an independent review in the same worktree
-    bb(["factory", "done", "--outcome", "complete", "--summary", "Built on its branch; tests pass."], as(build));
+    bb(["solo-factor", "done", "--outcome", "complete", "--summary", "Built on its branch; tests pass."], as(build));
     const review = await until(() => ticket("LIVE-1").threads["code-review"]);
     const reviewThread = await until(() => threads().find((t) => t.id === review && t.environmentId));
     check("review starts in a new thread", review && review !== build);
@@ -616,7 +616,7 @@ async function main() {
 
     // --- a stage's question goes to the ticket's issue owner, who takes it to the founder
     bb(
-      ["factory", "ask", "Should rest days count as missed?", "--context", "Today they count as rest.", "--option", "Count as rest", "--option", "Count as missed", "--recommend", "Count as missed."],
+      ["solo-factor", "ask", "Should rest days count as missed?", "--context", "Today they count as rest.", "--option", "Count as rest", "--option", "Count as missed", "--recommend", "Count as missed."],
       as(review),
     );
     const owner = await until(() => threads().find((t) => t.title === "Issue owner"));
@@ -626,7 +626,7 @@ async function main() {
     const toOwner = await until(() => (lastMessage(owner.id).includes("Should rest days count as missed?") ? true : null));
     check("the owner receives the stage's question", toOwner === true);
     bb(
-      ["factory", "ask", "Should a rest day count as missed?", "--context", "Today it counts as rest.", "--option", "Count as rest", "--option", "Count as missed", "--recommend", "Count as missed."],
+      ["solo-factor", "ask", "Should a rest day count as missed?", "--context", "Today it counts as rest.", "--option", "Count as rest", "--option", "Count as missed", "--recommend", "Count as missed."],
       as(owner.id),
     );
     const question = status().inbox.find((e) => e.kind === "question");
@@ -637,8 +637,8 @@ async function main() {
     const cleared1 = await until(() => (status().inbox.some((e) => e.kind === "question") ? null : true));
     check("typing the answer in the thread clears the inbox entry", cleared1 === true);
     check("the ticket then waits on its owner to pass the answer on", ticket("LIVE-1").status === "with-owner");
-    bb(["factory", "note", "Founder: a rest day counts as missed."], as(owner.id));
-    bb(["factory", "message", "LIVE-1:code-review", "Count as missed."], as(owner.id));
+    bb(["solo-factor", "note", "Founder: a rest day counts as missed."], as(owner.id));
+    bb(["solo-factor", "message", "LIVE-1:code-review", "Count as missed."], as(owner.id));
     const answered = await until(() => (lastMessage(review).includes("Count as missed.") ? true : null));
     const after = ticket("LIVE-1").status;
     // The echo model answers at once and never reports, so by now it may have been reminded and flagged.
@@ -646,26 +646,26 @@ async function main() {
 
     // --- a small bug gets no workspace: it rides with the next planned ticket in its lane
     const before = threads().length;
-    bb(["factory", "enqueue", "LIVE-4", "Typo on the greeting", "--lane", "Checkout", "--pipeline", "small-bug", "--project", project]);
+    bb(["solo-factor", "enqueue", "LIVE-4", "Typo on the greeting", "--lane", "Checkout", "--pipeline", "small-bug", "--project", project]);
     check("a small bug rides with the next ticket in its lane", ticket("LIVE-2").riders?.[0]?.key === "LIVE-4" && !ticket("LIVE-4") && threads().length === before);
 
     // --- review returns changes; author fixes; ticket moves past the review
     // The last review must say what changed; without it nothing is recorded.
     let refused = "";
     try {
-      bb(["factory", "done", "--outcome", "changes_requested", "--summary", "Rename the helper."], as(review));
+      bb(["solo-factor", "done", "--outcome", "changes_requested", "--summary", "Rename the helper."], as(review));
     } catch (error) {
       refused = String(error.stderr ?? error.message);
     }
     check("the last review is refused without a change note", refused.includes("change_note") && !lastMessage(build).includes("Rename the helper."));
-    bb(["factory", "done", "--outcome", "changes_requested", "--summary", "Rename the helper.", "--before", "The greeting said Hello.", "--after", "It says Welcome back.", "--why", "The founder asked for a warmer greeting."], as(review));
+    bb(["solo-factor", "done", "--outcome", "changes_requested", "--summary", "Rename the helper.", "--before", "The greeting said Hello.", "--after", "It says Welcome back.", "--why", "The founder asked for a warmer greeting."], as(review));
     check("the change note is kept on the ticket", ticket("LIVE-1").changeNote?.after === "It says Welcome back.");
     const findings = await until(() => (lastMessage(build).includes("Rename the helper.") ? true : null));
     check("review findings go to the builder's existing thread", findings === true);
     // A before/after render, as the reviewer's preview harness writes one: left half grey, right half green.
     const shot = join(work, "before-after.png");
     writeFileSync(shot, makePng(320, 160, (x) => (x < 160 ? [200, 200, 200] : [40, 160, 90])));
-    bb(["factory", "done", "--outcome", "complete", "--summary", "Helper renamed.", "--founder-check", "Open the greeting screen as demo@example.com and see the new name.", "--screenshot", shot], as(build));
+    bb(["solo-factor", "done", "--outcome", "complete", "--summary", "Helper renamed.", "--founder-check", "Open the greeting screen as demo@example.com and see the new name.", "--screenshot", shot], as(build));
     const gate = await until(() => status().inbox.find((e) => e.kind === "check"));
     check("a visible change waits for the founder to try it before ship", Boolean(gate) && !ticket("LIVE-1").threads.ship);
     check("his check lives in the owner's thread", gate.threadId === owner.id);
@@ -676,40 +676,40 @@ async function main() {
     const elsewhereId = elsewhere.id ?? elsewhere.thread?.id ?? null;
     await runButtonChecks(gate, elsewhereId);
 
-    bb(["factory", "approve", gate.id]);
+    bb(["solo-factor", "approve", gate.id]);
     const ship = await until(() => ticket("LIVE-1").threads.ship);
     check("after fixes the ticket goes to ship without a second review", Boolean(ship));
 
     // --- agent-to-agent messaging
-    bb(["factory", "message", "orchestrator", "Units differ between plan and code."], as(ship));
-    const relayed = await until(() => (lastMessage(orchestrator.id).includes("Units differ between plan and code.") ? true : null));
-    check("a worker can message the orchestrator", relayed === true);
+    bb(["solo-factor", "message", "architect", "Units differ between plan and code."], as(ship));
+    const relayed = await until(() => (lastMessage(architect.id).includes("Units differ between plan and code.") ? true : null));
+    check("a worker can message the architect", relayed === true);
 
     // --- finishing frees the lane
-    bb(["factory", "done", "--outcome", "complete", "--summary", "Merged."], as(ship));
+    bb(["solo-factor", "done", "--outcome", "complete", "--summary", "Merged."], as(ship));
     check("the ticket finishes after its last stage", ticket("LIVE-1").status === "done");
-    await phoneChecks(orchestrator.id);
+    await phoneChecks(architect.id);
     check("a finished ticket's threads are left for the founder to archive", threads().some((t) => t.id === build));
 
     // --- follow-up work under a new ticket continues in the same workspace
-    bb(["factory", "follow-up", "LIVE-9", "Round two", "--handoff", "Rename it back."], as(owner.id));
+    bb(["solo-factor", "follow-up", "LIVE-9", "Round two", "--handoff", "Rename it back."], as(owner.id));
     const followUp = await until(() => ticket("LIVE-9")?.threads.build);
     const followThread = await until(() => threads().find((t) => t.id === followUp && t.environmentId));
     check("a follow-up ticket takes over the shipped ticket's workspace", followThread?.environmentId === buildThread?.environmentId && ticket("LIVE-1").status === "archived");
     const workspaces = () => JSON.parse(bb(["environment", "list", "--json"]));
     const renamed = await until(() => (workspaces().find((e) => e.id === buildThread?.environmentId)?.name === "LIVE-9" ? true : null), 8_000);
     check("the workspace takes the new ticket's name", renamed === true, JSON.stringify(workspaces().map((e) => [e.id, e.name])) + ` want ${buildThread?.environmentId}`);
-    bb(["factory", "cancel", "LIVE-9", "--project", project]);
+    bb(["solo-factor", "cancel", "LIVE-9", "--project", project]);
     // LIVE-2 was held up behind it only for the length of this check.
-    bb(["factory", "done", "--outcome", "complete", "--summary", "Built."], as(ticket("LIVE-3").threads.fix));
+    bb(["solo-factor", "done", "--outcome", "complete", "--summary", "Built."], as(ticket("LIVE-3").threads.fix));
     // The Done card's Archive button, through the same engine rule as the CLI.
     const live3Threads = Object.values(ticket("LIVE-3").threads);
-    bb(["factory", "archive", "LIVE-3", "--project", project]);
+    bb(["solo-factor", "archive", "LIVE-3", "--project", project]);
     const cleared = await until(() => (status().items.find((i) => i.key === "LIVE-3")?.status === "archived" ? true : null));
     check("archiving its workspace clears a finished ticket from the board", cleared === true);
     const gone = await until(() => (live3Threads.every((id) => !threads().some((t) => t.id === id)) ? true : null));
     check("archiving from the board archives the ticket's threads in bb", gone === true);
-    check("archiving a ticket leaves the standing agents alone", threads().some((t) => t.id === orchestrator.id));
+    check("archiving a ticket leaves the standing agents alone", threads().some((t) => t.id === architect.id));
     const next = await until(() => (ticket("LIVE-2").status !== "queued" ? true : null));
     check("the next ticket in the lane starts", next === true);
     const told = await until(() => (lastMessage(ticket("LIVE-2").threads.build ?? "").includes("LIVE-4: Typo on the greeting") ? true : null));
@@ -753,8 +753,8 @@ async function main() {
     sh("git", ["checkout", "-q", "main"], { cwd: repoDir });
     check("a branch for a small bug riding with a ticket resolves as a small bug, from the factory's own record", small.code === 3 && small.out === "SMALL_BUG: LIVE-4", `${small.code} ${small.out}`);
     check("a branch for a planned ticket resolves to its plan", planned.code === 0 && planned.out.endsWith("LIVE-20 - Coupons.md"), `${planned.code} ${planned.out}`);
-    bb(["factory", "cancel", "LIVE-20", "--project", project]);
-    bb(["factory", "cancel", "LIVE-21", "--project", project]);
+    bb(["solo-factor", "cancel", "LIVE-20", "--project", project]);
+    bb(["solo-factor", "cancel", "LIVE-21", "--project", project]);
   } finally {
     const failed = results.filter((result) => !result.ok).length;
     console.log(`\n${results.length - failed}/${results.length} live checks passed.`);

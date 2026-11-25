@@ -17,7 +17,7 @@
     "bbPluginSdk": ">=0.6.132"
   },
   "bb": {
-    "name": "Factory",
+    "name": "Solo Factor",
     "description": "Run tickets through plan, review, build, review and ship in swimlanes, with a model per role, one inbox for founder decisions, and process skills you can change.",
     "branding": {
       "icon": "Workflow"

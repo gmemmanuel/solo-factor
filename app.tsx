@@ -1003,7 +1003,7 @@ const STATUS_LABEL: Record<Item["status"], string> = {
   "with-owner": "With issue owner",
   "with-planner": "With issue owner",
   triage: "With issue owner",
-  returned: "Returned to planner",
+  returned: "Returned to architect",
   stalled: "Stalled",
   failed: "Failed",
   done: "Done",
@@ -1733,7 +1733,7 @@ function SettingsPage() {
 // a list of agents beside it, and the chosen agent's conversation, so they can
 // go between the inbox, the swimlanes and the agents without the thread list.
 
-const AGENT_ORDER = ["orchestrator", "watch", "deploy", "integrator", "harness-improver", "cleaner"];
+const AGENT_ORDER = ["architect", "observer", "deployer", "integrator", "mechanic", "cleaner"];
 const AGENT_KEY = "solo-factor.agents.open";
 
 function useAgents() {

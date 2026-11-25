@@ -9,9 +9,9 @@ there is to decide and where each kind of change belongs.
 | You want to change | Change this | Reach |
 |---|---|---|
 | A command, a path, a rule about your project | `FACTORY.md` in your repository | one project |
-| Which model plays a role, or its fallback | Factory → Settings, or `bb factory role` | one project |
-| Which skill a stage uses | `bb factory stage <stage> --prompt …` and the "Stage skills" table in `FACTORY.md` | one project |
-| How many tickets run at once, the ticket link | Factory → Settings | one project |
+| Which model plays a role, or its fallback | the Factory settings page, or `bb solo-factor role` | one project |
+| Which skill a stage uses | `bb solo-factor stage <stage> --prompt …` and the "Stage skills" table in `FACTORY.md` | one project |
+| How many tickets run at once, the ticket link | the Factory settings page | one project |
 | A script's setting (base branch, CI check, lane limit, tracker, labels) | `factory.config.json` in your repository | one project |
 | What a script enforces | `scripts/factory/` in your repository; or `kit/` in your clone, then reinstall | one project; or all |
 | How planning, review, build or ship is done | the skill in `skills/` (or your project's own skill) | every project on this machine |
@@ -28,7 +28,7 @@ The Mechanic asks these during onboarding and recommends an answer for each.
 
 1. **Models per role, and fallbacks.** The pipeline assumes reasoning is
    spent on planning and review, and that a builder executes a contract.
-   If your builder is as strong as your planner, tiers matter less; if it is
+   If your builder is as strong as your Architect, tiers matter less; if it is
    much weaker, plans must be filled in more completely.
 2. **The founder gate.** By default you try every ticket that changes a
    screen or its words, and nothing else. Stricter (every ticket) is safe
@@ -55,7 +55,7 @@ The Mechanic asks these during onboarding and recommends an answer for each.
 If your project already has a planning, review or shipping skill, keep it:
 
 ```sh
-bb factory stage plan --prompt 'Use the `my-plan` skill to plan {key}: {title}.\n\n{brief}'
+bb solo-factor stage plan --prompt 'Use the `my-plan` skill to plan {key}: {title}.\n\n{brief}'
 ```
 
 The prompt takes `{key}`, `{title}`, `{brief}`, `{previous}` (the previous

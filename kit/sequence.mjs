@@ -263,7 +263,7 @@ export function validate({ board, schedule, previous = null, maxLanes = 4, ignor
   return { lanes, unmeasured };
 }
 
-/** What `bb factory sync` takes. Work in flight is left out: the factory already has it and a sync never touches it. */
+/** What `bb solo-factor sync` takes. Work in flight is left out: the factory already has it and a sync never touches it. */
 export function toSync(result, { ticketUrl = '' } = {}) {
   const leftOut = [];
   const lanes = result.lanes.map((lane) => ({
@@ -404,7 +404,7 @@ function publish(root, config, result) {
   const { lanes, leftOut } = toSync(result, { ticketUrl: config.tracker.url });
   const bin = process.env.BB_BIN || (existsSync(path.join(os.homedir(), '.bb', 'bin', 'bb')) ? path.join(os.homedir(), '.bb', 'bin', 'bb') : 'bb');
   const project = bbProject(root, config);
-  const sent = spawnSync(bin, ['factory', 'sync', JSON.stringify({ lanes }), ...(project ? ['--project', project] : [])], { encoding: 'utf8' });
+  const sent = spawnSync(bin, ['solo-factor', 'sync', JSON.stringify({ lanes }), ...(project ? ['--project', project] : [])], { encoding: 'utf8' });
   require_(sent.status === 0, `Could not update the factory (is the bb app open?): ${(sent.stderr || sent.stdout || '').trim()}`);
   console.log(sent.stdout.trim());
   for (const line of leftOut) console.log(`not sent — ${line}`);

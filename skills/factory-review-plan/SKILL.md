@@ -124,7 +124,7 @@ Then report:
   summary gives the product explanation in two or three sentences, the count
   of corrections, and ends with `Implementer tier: Tier N` and the builder.
   First record both on the ticket, so the build starts on the right model:
-  `bb factory tier <KEY> --tier N --builder ui|fullstack`. With a tracker,
+  `bb solo-factor tier <KEY> --tier N --builder ui|fullstack`. With a tracker,
   replace "Plan written" with "Plan reviewed" and read the ticket back
   (`factory-tracker` skill); the scheduler treats that label as the proof
   of review.

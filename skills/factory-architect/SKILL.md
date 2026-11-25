@@ -1,5 +1,5 @@
 ---
-name: factory-orchestrator
+name: factory-architect
 description: Charter for the factory's standing Architect, the agent that holds the whole picture, decides what gets built, and files and plans every ticket the founder approves. Use when you are the Architect thread, or when asked to plan, sequence, or queue work for the factory.
 ---
 
@@ -78,9 +78,9 @@ If your memory file does not exist yet, this is your first session here.
 5. A fix too small to plan goes on the `small-bug` pipeline with a brief that
    says exactly what is wrong and where. It rides with the next planned
    ticket in its lane.
-6. When the review returns your plan, fix it, then `bb factory advance <KEY>`.
+6. When the review returns your plan, fix it, then `bb solo-factor advance <KEY>`.
    If a ticket's work changed after its code review and needs a fresh one,
-   `bb factory rereview <KEY>` sends it back to review in a new thread.
+   `bb solo-factor rereview <KEY>` sends it back to review in a new thread.
 7. If the founder asks to review a ticket themselves before it ships, say so in
    its brief: "Founder review before release." The builder then waits for
    their approval even when no screen changes. UI changes get their review
@@ -143,7 +143,7 @@ founder decision surfaced late, and what the founder changed after trying
 the result. Find the two or three things you would plan differently, and
 write them into your memory file as rules for yourself. If the fix is a
 change to a skill or instruction, hand it to the Mechanic with
-`factory_message` to `harness-improver`. Tell the founder in a few lines what you changed.
+`factory_message` to `mechanic`. Tell the founder in a few lines what you changed.
 
 ## Your memory file
 

@@ -1,4 +1,4 @@
-// `bb factory …` — the same operations the Factory page and the agent tools
+// `bb solo-factor …` — the same operations the Factory page and the agent tools
 // use, for agents and scripts. Argument parsing is deliberately small: flags
 // are `--name value`, everything else is positional.
 import type { FactoryEngine } from "./engine.js";
@@ -7,35 +7,35 @@ import type { Attachment } from "./model.js";
 import type { FactoryStore } from "./store.js";
 
 export const CLI_COMMANDS = [
-  { name: "status", summary: "Show lanes, tickets and the inbox", usage: "bb factory status [--project <id>] [--json]" },
-  { name: "enqueue", summary: "Add a ticket to a lane", usage: "bb factory enqueue <key> <title…> [--lane <name>] [--pipeline <name>] [--tier 1|2|3] [--builder ui|fullstack] [--brief <text>]" },
-  { name: "lanes", summary: "Queue many tickets at once from JSON", usage: "bb factory lanes '<json>'   # {\"lanes\":[{\"name\":\"A\",\"items\":[{\"key\":\"APP-1\",\"title\":\"…\",\"pipeline\":\"planned\",\"brief\":\"…\"}]}]}" },
-  { name: "sync", summary: "Make the lanes match a schedule: queue new tickets, move changed ones, drop unstarted ones no longer listed. Never reorders a lane or stops started work", usage: "bb factory sync '<json>'   # same JSON as lanes; list every ticket that belongs in the factory" },
-  { name: "move", summary: "Move a ticket to a lane and slot", usage: "bb factory move <key> --lane <name> [--position <n>]" },
-  { name: "advance", summary: "Send a ticket on to its next stage", usage: "bb factory advance <key> [--summary <text>]" },
-  { name: "cancel", summary: "Take a ticket out of the factory", usage: "bb factory cancel <key>" },
-  { name: "rereview", summary: "Send a ticket back to its last review, in a fresh thread, because its work changed after review", usage: "bb factory rereview <key>" },
-  { name: "archive", summary: "Archive a merged ticket's workspace and take it off the board (the Done card's Archive button)", usage: "bb factory archive <key>" },
-  { name: "done", summary: "Report this thread's stage (same as factory_stage_done)", usage: "bb factory done --outcome complete|changes_requested|blocked --summary <text> [--founder-check <text> [--screenshot <path>]...] [--before <text> --after <text> --why <text>] [--no-founder-check <reason>] [--rereview]" },
-  { name: "reopen-check", summary: "Put a ticket that left with an unapproved founder check back at the gate, its check in the inbox", usage: "bb factory reopen-check <KEY> [--approved]" },
-  { name: "check-images", summary: "Put the side-by-side before/after image on a check waiting for the founder (same as factory_check_images)", usage: "bb factory check-images --before-after <path> [--screenshot <path>]… [--key <KEY>]" },
-  { name: "ask", summary: "Ask the founder (same as factory_ask_founder)", usage: "bb factory ask <question…> [--context <text>] [--option <text>]… [--recommend <text>] [--todo|--testing] [--account <text>] [--step <text>]…" },
-  { name: "ask-planner", summary: "Send something back to this ticket's issue owner (same as factory_ask_planner)", usage: "bb factory ask-planner <handoff…>" },
-  { name: "follow-up", summary: "Issue owner: continue a shipped ticket under a new one, in the same workspace (same as factory_follow_up)", usage: "bb factory follow-up <key> <title…> --handoff <text>" },
-  { name: "retitle", summary: "Title every ticket thread with its role and name each workspace for its ticket", usage: "bb factory retitle [--project <id>]" },
-  { name: "note", summary: "Issue owner: replace the ticket note (same as factory_ticket_note)", usage: "bb factory note <text…>" },
-  { name: "message", summary: "Message an agent or a ticket's thread", usage: "bb factory message <agent|KEY|KEY:stage> <text…>" },
-  { name: "close", summary: "Standing agent: close one of your own inbox questions once it is settled (same as factory_close_ask)", usage: "bb factory close <entry-id>" },
-  { name: "inbox", summary: "List open founder decisions", usage: "bb factory inbox [--json]" },
-  { name: "approve", summary: "Approve a ticket the founder has tried, so it ships", usage: "bb factory approve <entry-id>" },
-  { name: "retag", summary: "Correct an inbox entry's kind", usage: "bb factory retag <entry-id> question|test|todo" },
-  { name: "answer", summary: "Answer an inbox entry", usage: "bb factory answer <entry-id> <text…>" },
-  { name: "agent", summary: "Start or rotate a standing agent", usage: "bb factory agent start|rotate <agent-id> [--project <id>]" },
-  { name: "prompt", summary: "Send a standing agent a prompt, starting it if needed (for automations)", usage: "bb factory prompt <agent-id> <text…> [--project <id>]" },
-  { name: "role", summary: "Set which model plays a role", usage: "bb factory role <role> [--provider <id>] [--model <id>] [--reasoning <level>] [--permission accept-edits|auto|full] [--fallback-provider <id>] [--fallback-model <id>] [--fallback-reasoning <level>] [--project <id>]" },
-  { name: "tier", summary: "Record a ticket's implementer tier and builder from its plan", usage: "bb factory tier <key> [--tier 1|2|3] [--builder ui|fullstack]" },
-  { name: "stage", summary: "Set a stage's prompt (which skill it uses) or role", usage: "bb factory stage <stage> [--prompt <text>] [--role <role>] [--project <id>]   # prompt takes {key} {title} {brief} {previous} {lane}" },
-  { name: "config", summary: "Print the factory configuration", usage: "bb factory config [--project <id>]" },
+  { name: "status", summary: "Show lanes, tickets and the inbox", usage: "bb solo-factor status [--project <id>] [--json]" },
+  { name: "enqueue", summary: "Add a ticket to a lane", usage: "bb solo-factor enqueue <key> <title…> [--lane <name>] [--pipeline <name>] [--tier 1|2|3] [--builder ui|fullstack] [--brief <text>]" },
+  { name: "lanes", summary: "Queue many tickets at once from JSON", usage: "bb solo-factor lanes '<json>'   # {\"lanes\":[{\"name\":\"A\",\"items\":[{\"key\":\"APP-1\",\"title\":\"…\",\"pipeline\":\"planned\",\"brief\":\"…\"}]}]}" },
+  { name: "sync", summary: "Make the lanes match a schedule: queue new tickets, move changed ones, drop unstarted ones no longer listed. Never reorders a lane or stops started work", usage: "bb solo-factor sync '<json>'   # same JSON as lanes; list every ticket that belongs in the factory" },
+  { name: "move", summary: "Move a ticket to a lane and slot", usage: "bb solo-factor move <key> --lane <name> [--position <n>]" },
+  { name: "advance", summary: "Send a ticket on to its next stage", usage: "bb solo-factor advance <key> [--summary <text>]" },
+  { name: "cancel", summary: "Take a ticket out of the factory", usage: "bb solo-factor cancel <key>" },
+  { name: "rereview", summary: "Send a ticket back to its last review, in a fresh thread, because its work changed after review", usage: "bb solo-factor rereview <key>" },
+  { name: "archive", summary: "Archive a merged ticket's workspace and take it off the board (the Done card's Archive button)", usage: "bb solo-factor archive <key>" },
+  { name: "done", summary: "Report this thread's stage (same as factory_stage_done)", usage: "bb solo-factor done --outcome complete|changes_requested|blocked --summary <text> [--founder-check <text> [--screenshot <path>]...] [--before <text> --after <text> --why <text>] [--no-founder-check <reason>] [--rereview]" },
+  { name: "reopen-check", summary: "Put a ticket that left with an unapproved founder check back at the gate, its check in the inbox", usage: "bb solo-factor reopen-check <KEY> [--approved]" },
+  { name: "check-images", summary: "Put the side-by-side before/after image on a check waiting for the founder (same as factory_check_images)", usage: "bb solo-factor check-images --before-after <path> [--screenshot <path>]… [--key <KEY>]" },
+  { name: "ask", summary: "Ask the founder (same as factory_ask_founder)", usage: "bb solo-factor ask <question…> [--context <text>] [--option <text>]… [--recommend <text>] [--todo|--testing] [--account <text>] [--step <text>]…" },
+  { name: "ask-owner", summary: "Send something back to this ticket's issue owner (same as factory_ask_owner)", usage: "bb solo-factor ask-owner <handoff…>" },
+  { name: "follow-up", summary: "Issue owner: continue a shipped ticket under a new one, in the same workspace (same as factory_follow_up)", usage: "bb solo-factor follow-up <key> <title…> --handoff <text>" },
+  { name: "retitle", summary: "Title every ticket thread with its role and name each workspace for its ticket", usage: "bb solo-factor retitle [--project <id>]" },
+  { name: "note", summary: "Issue owner: replace the ticket note (same as factory_ticket_note)", usage: "bb solo-factor note <text…>" },
+  { name: "message", summary: "Message an agent or a ticket's thread", usage: "bb solo-factor message <agent|KEY|KEY:stage> <text…>" },
+  { name: "close", summary: "Standing agent: close one of your own inbox questions once it is settled (same as factory_close_ask)", usage: "bb solo-factor close <entry-id>" },
+  { name: "inbox", summary: "List open founder decisions", usage: "bb solo-factor inbox [--json]" },
+  { name: "approve", summary: "Approve a ticket the founder has tried, so it ships", usage: "bb solo-factor approve <entry-id>" },
+  { name: "retag", summary: "Correct an inbox entry's kind", usage: "bb solo-factor retag <entry-id> question|test|todo" },
+  { name: "answer", summary: "Answer an inbox entry", usage: "bb solo-factor answer <entry-id> <text…>" },
+  { name: "agent", summary: "Start or rotate a standing agent", usage: "bb solo-factor agent start|rotate <agent-id> [--project <id>]" },
+  { name: "prompt", summary: "Send a standing agent a prompt, starting it if needed (for automations)", usage: "bb solo-factor prompt <agent-id> <text…> [--project <id>]" },
+  { name: "role", summary: "Set which model plays a role", usage: "bb solo-factor role <role> [--provider <id>] [--model <id>] [--reasoning <level>] [--permission accept-edits|auto|full] [--fallback-provider <id>] [--fallback-model <id>] [--fallback-reasoning <level>] [--project <id>]" },
+  { name: "tier", summary: "Record a ticket's implementer tier and builder from its plan", usage: "bb solo-factor tier <key> [--tier 1|2|3] [--builder ui|fullstack]" },
+  { name: "stage", summary: "Set a stage's prompt (which skill it uses) or role", usage: "bb solo-factor stage <stage> [--prompt <text>] [--role <role>] [--project <id>]   # prompt takes {key} {title} {brief} {previous} {lane}" },
+  { name: "config", summary: "Print the factory configuration", usage: "bb solo-factor config [--project <id>]" },
 ];
 
 interface Parsed {
@@ -149,7 +149,7 @@ export async function runCli(
         try {
           plan = JSON.parse(raw);
         } catch {
-          throw new FactoryError("`bb factory lanes` takes one JSON argument; see `bb factory help`.");
+          throw new FactoryError("`bb solo-factor lanes` takes one JSON argument; see `bb solo-factor help`.");
         }
         const lanes = (plan as { lanes?: unknown }).lanes;
         if (!Array.isArray(lanes)) throw new FactoryError('Expected {"lanes":[…]}.');
@@ -179,7 +179,7 @@ export async function runCli(
         try {
           plan = JSON.parse(rest.join(" ")) as { lanes?: unknown };
         } catch {
-          throw new FactoryError("`bb factory sync` takes one JSON argument; see `bb factory help`.");
+          throw new FactoryError("`bb solo-factor sync` takes one JSON argument; see `bb solo-factor help`.");
         }
         if (!Array.isArray(plan.lanes)) throw new FactoryError('Expected {"lanes":[…]}.');
         const lanes = (plan.lanes as { name?: unknown; items?: unknown }[]).map((lane) => ({
@@ -275,9 +275,9 @@ export async function runCli(
         });
         return ok(entry, entry.id === "" ? "Sent to this ticket's issue owner. The reply will arrive in this thread. End your turn." : `Asked (${entry.id}). The answer will arrive in the thread it concerns. End your turn.`);
       }
-      case "ask-planner": {
+      case "ask-owner": {
         if (rest.length === 0) break;
-        const text = await engine.askPlanner(thread(), rest.join(" "));
+        const text = await engine.askOwner(thread(), rest.join(" "));
         return ok({ message: text }, text);
       }
       case "follow-up": {
