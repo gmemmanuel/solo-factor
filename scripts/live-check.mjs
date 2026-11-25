@@ -143,7 +143,7 @@ async function runButtonChecks(entry, otherThread = null) {
     page.on("console", (message) => {
       if (message.text().includes("[factory]") || message.type() === "error") consoleNotes.push(message.text().slice(0, 300));
     });
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     // The inbox shows small cards; a card opens a pop-up with the whole entry.
     const openTile = async (key) => {
       await page.locator('[data-testid="inbox-tile"]').first().waitFor({ timeout: 30_000 });
@@ -270,23 +270,23 @@ async function runButtonChecks(entry, otherThread = null) {
     const asksAgain = (await approve.innerText()).includes("Press again") && Boolean(status().inbox.find((e) => e.id === entry.id));
     check("one press on Approve and ship releases nothing; it asks for a second", asksAgain);
     await page.keyboard.press("Escape");
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-lanes`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-lanes`);
     const lanes = await page.locator('[data-testid="lane"]').first().waitFor({ timeout: 30_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "page-lanes.png") });
     check("swimlanes have their own page", lanes && (await page.locator('[data-testid="inbox-entry"]').count()) === 0);
     const headers = (await page.locator("thead th").allInnerTexts()).map((text) => text.trim());
     check("swimlane columns read Track, Next up, In Progress, Done", headers.join("|") === "Track|Next up|In Progress|Done", headers.join("|"));
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-settings`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-settings`);
     const url = page.locator('[data-testid="ticket-url"]');
     await url.waitFor({ timeout: 30_000 });
     await url.fill("https://tracker.example/issue/{key}");
     await url.press("Enter");
     await page.waitForTimeout(1500);
     await page.screenshot({ path: join(work, "page-settings.png") });
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-lanes`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-lanes`);
     const arrow = await page.locator('[data-testid="ticket-link"]:visible').first().waitFor({ timeout: 30_000 }).then(() => true, () => false);
     check("settings has its own page, and a ticket link set there puts an arrow on each ticket", arrow);
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     await openTile("LIVE-1");
 
     // --- the reply box on that entry
@@ -313,7 +313,7 @@ async function runButtonChecks(entry, otherThread = null) {
     const banner = await page.locator('[data-testid="inbox-banner"]').getByText("Try it before it ships").first().waitFor({ timeout: 15_000 }).then(() => true, () => false);
     check("the thread shows what the founder was asked, above its composer", banner);
     await page.screenshot({ path: join(work, "draft-in-thread.png") });
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     await openTile("LIVE-1");
     const again = gateCard().locator('[data-testid="inbox-reply"]');
     await again.waitFor({ timeout: 30_000 });
@@ -342,9 +342,9 @@ async function runButtonChecks(entry, otherThread = null) {
     // Dealing with one entry moves the panel to the next; it does not close.
     const moved = await page.locator('[data-testid="inbox-panel"]').getByText("First in lane").first().waitFor({ timeout: 15_000 }).then(() => true, () => false);
     check("after an answer is sent the panel shows the next entry", moved);
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-lanes`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-lanes`);
     const elsewhere = (await page.locator('[data-testid="inbox-panel"]').count()) === 0;
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     const back = await page.locator('[data-testid="inbox-panel"]').getByText("First in lane").first().waitFor({ timeout: 30_000 }).then(() => true, () => false);
     check("the panel is still open on returning to the inbox, and is not shown on other pages", elsewhere && back);
     const request = requestWith(stalled.threadId, "Carry on from the last step.");
@@ -379,7 +379,7 @@ async function phoneChecks(orchestratorId) {
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const fits = async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-lanes`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-lanes`);
     await page.locator('[data-testid="change-note"]:visible').first().waitFor({ timeout: 30_000 });
     await page.screenshot({ path: join(work, "phone-lanes.png") });
     check("swimlanes fit a phone, with What changed on the merged card", await fits());
@@ -394,7 +394,7 @@ async function phoneChecks(orchestratorId) {
     await page.keyboard.press("Escape");
     // On a desktop window the panel starts below bb's page header; nothing covers its title.
     const desk = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-    await desk.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-lanes`);
+    await desk.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-lanes`);
     await desk.locator('[data-testid="change-note"]:visible').first().click({ timeout: 30_000 });
     await desk.locator('[data-testid="change-note-panel"]').waitFor({ timeout: 10_000 });
     await desk.waitForTimeout(500);
@@ -416,7 +416,7 @@ async function phoneChecks(orchestratorId) {
     await desk.waitForTimeout(2500);
     check("Home stays Home after visiting an agent's thread", !desk.url().includes("factory-agents"), desk.url());
     // The Factory's own link to an agent opens the Agents page with that agent marked.
-    await desk.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-agents/orchestrator`);
+    await desk.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
     const marked = await desk.locator('[data-testid="agents-sidebar"] [aria-current="page"]').first().innerText({ timeout: 20_000 }).catch(() => "");
     await desk.screenshot({ path: join(work, "desktop-agent-thread.png") });
     check("the Agents page marks the open agent in its sidebar", marked.includes("Architect"), marked);
@@ -429,11 +429,11 @@ async function phoneChecks(orchestratorId) {
     const saved = status().items !== undefined ? JSON.parse(bb(["factory", "config", "--project", project])).agentOrder : [];
     check("dragging an agent in the Agents list reorders it and saves the order", reordered === true && Array.isArray(saved) && saved.length > 0, `${firstBefore} -> ${(await rows.first().innerText()).trim()} | ${JSON.stringify(saved)}`);
     await desk.close();
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: join(work, "phone-inbox.png") });
     check("the inbox fits a phone", await fits());
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-agents/orchestrator`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
     const chat = await page.locator('[data-follow-up-composer], textarea, [contenteditable="true"]').first().waitFor({ timeout: 30_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "phone-agents.png") });
     check("the Agents page shows the agent's conversation with a composer on a phone", chat && (await fits()));
@@ -441,7 +441,7 @@ async function phoneChecks(orchestratorId) {
     // A banner above the thread's composer starts as one line.
     bb(["factory", "ask", "Open the thread and answer the questions there.", "--todo", "--context", "A long explanation. ".repeat(40)], as(orchestratorId));
     // An agent's question still titles its inbox tile (it has no ticket title).
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory`);
     const agentTile = page.locator('[data-testid="inbox-tile-question"]').filter({ hasText: "Open the thread and answer the questions there." }).first();
     check("an agent's inbox tile shows its question as the title", await agentTile.waitFor({ timeout: 15_000 }).then(() => true, () => false));
     await page.goto(`http://127.0.0.1:${PORT}/threads/${orchestratorId}`);
@@ -455,7 +455,7 @@ async function phoneChecks(orchestratorId) {
     await page.screenshot({ path: join(work, "phone-banner-open.png") });
     check("tapping the banner shows the whole entry", opened.includes("A long explanation."));
     // The banner shows above the composer on the Agents page too.
-    await page.goto(`http://127.0.0.1:${PORT}/plugins/bbonductor/factory-agents/orchestrator`);
+    await page.goto(`http://127.0.0.1:${PORT}/plugins/solo-factor/factory-agents/orchestrator`);
     const bannerOnAgents = await page.locator('[data-testid="inbox-banner"]').first().waitFor({ timeout: 20_000 }).then(() => true, () => false);
     await page.screenshot({ path: join(work, "phone-agents-banner.png") });
     check("on a phone the Agents page shows the agent's banner above the composer", bannerOnAgents);
@@ -561,7 +561,7 @@ async function main() {
     bb(["plugin", "install", root, "--yes"]);
     bb(["plugin", "install", echoDir, "--yes"]);
     const loaded = bb(["plugin", "list"]);
-    check("plugin loads on a real bb server", /bbonductor@\S+\s+running/.test(loaded), loaded.slice(0, 400));
+    check("plugin loads on a real bb server", /solo-factor@\S+\s+running/.test(loaded), loaded.slice(0, 400));
 
     project = JSON.parse(bb(["project", "create", "--name", "Live check", "--root", repoDir, "--json"])).id;
     for (const role of ["orchestrator", "plan-review", "build", "code-review", "ship", "harness-improver"]) {
@@ -759,7 +759,7 @@ async function main() {
     const failed = results.filter((result) => !result.ok).length;
     console.log(`\n${results.length - failed}/${results.length} live checks passed.`);
     if (keep) {
-      console.log(`Server left running: http://127.0.0.1:${PORT}/plugins/bbonductor/factory  (stop with: kill -- -${server.pid})`);
+      console.log(`Server left running: http://127.0.0.1:${PORT}/plugins/solo-factor/factory  (stop with: kill -- -${server.pid})`);
       server.unref();
     } else {
       stop();

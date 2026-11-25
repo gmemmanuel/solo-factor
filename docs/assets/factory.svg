@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 352" role="img" aria-labelledby="t d">
+<title id="t">The factory at work</title>
+<desc id="d">Tickets ride a conveyor belt through five stations: plan review, build, code review, you try it, and ship. Each station stamps the ticket as it passes, and it leaves merged.</desc>
+<style>
+  .bg{fill:#0d1117}.grid{stroke:#161b22;stroke-width:1}
+  .label{font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;fill:#8b949e;text-anchor:middle}
+  .small{font:500 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#6e7681}
+  .title{font:700 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.3em;fill:#e6edf3}
+  .body{fill:#161b22;stroke:#30363d;stroke-width:1.5}
+  .arm{fill:#30363d}
+  .belt{fill:#21262d;stroke:#30363d;stroke-width:1.5}
+  .tread{fill:none;stroke:#484f58;stroke-width:3;stroke-dasharray:10 14;animation:tread 1s linear infinite}
+  .wheel{fill:#161b22;stroke:#484f58;stroke-width:2}
+  .gear{transform-box:fill-box;transform-origin:center;animation:spin 6s linear infinite}
+  .gear.r{animation-direction:reverse;animation-duration:4s}
+  .press{animation:press 4s cubic-bezier(.3,0,.2,1) infinite}
+  .lamp{animation:lamp 4s linear infinite}
+  .card{animation:ride 12s linear infinite}
+  .face{animation:tint 12s linear infinite}
+  .tick{fill:none;stroke:#0d1117;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;animation:tick 12s linear infinite}
+  .ctext{font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#0d1117}
+  .puff{fill:#30363d;animation:puff 3.2s ease-out infinite}
+  .merged{animation:merged 4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes tread{to{stroke-dashoffset:-24}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes press{0%,100%{transform:translateY(0)}4%{transform:translateY(22px)}9%{transform:translateY(22px)}18%{transform:translateY(0)}}
+  @keyframes lamp{0%{opacity:1}12%{opacity:1}30%,100%{opacity:.18}}
+  @keyframes ride{from{transform:translateX(-90px)}to{transform:translateX(980px)}}
+  @keyframes tint{0%,20%{fill:#8b949e}22%,35%{fill:#58a6ff}37%,50%{fill:#f0b429}52%,65%{fill:#bc8cff}67%,80%{fill:#ff8f6b}82%,100%{fill:#3fb950}}
+  @keyframes tick{0%,81%{opacity:0}83%,100%{opacity:1}}
+  @keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:.9}100%{opacity:0;transform:translate(12px,-32px) scale(1.6)}}
+  @keyframes merged{0%{transform:scale(.6);opacity:.3}10%{transform:scale(1.25);opacity:1}30%,100%{transform:scale(1);opacity:.55}}
+  @media (prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}
+</style>
+<rect class="bg" width="960" height="352" rx="14"/>
+<line class="grid" x1="40" y1="0" x2="40" y2="352"/>
+<line class="grid" x1="80" y1="0" x2="80" y2="352"/>
+<line class="grid" x1="120" y1="0" x2="120" y2="352"/>
+<line class="grid" x1="160" y1="0" x2="160" y2="352"/>
+<line class="grid" x1="200" y1="0" x2="200" y2="352"/>
+<line class="grid" x1="240" y1="0" x2="240" y2="352"/>
+<line class="grid" x1="280" y1="0" x2="280" y2="352"/>
+<line class="grid" x1="320" y1="0" x2="320" y2="352"/>
+<line class="grid" x1="360" y1="0" x2="360" y2="352"/>
+<line class="grid" x1="400" y1="0" x2="400" y2="352"/>
+<line class="grid" x1="440" y1="0" x2="440" y2="352"/>
+<line class="grid" x1="480" y1="0" x2="480" y2="352"/>
+<line class="grid" x1="520" y1="0" x2="520" y2="352"/>
+<line class="grid" x1="560" y1="0" x2="560" y2="352"/>
+<line class="grid" x1="600" y1="0" x2="600" y2="352"/>
+<line class="grid" x1="640" y1="0" x2="640" y2="352"/>
+<line class="grid" x1="680" y1="0" x2="680" y2="352"/>
+<line class="grid" x1="720" y1="0" x2="720" y2="352"/>
+<line class="grid" x1="760" y1="0" x2="760" y2="352"/>
+<line class="grid" x1="800" y1="0" x2="800" y2="352"/>
+<line class="grid" x1="840" y1="0" x2="840" y2="352"/>
+<line class="grid" x1="880" y1="0" x2="880" y2="352"/>
+<line class="grid" x1="920" y1="0" x2="920" y2="352"/>
+<line class="grid" x1="0" y1="30" x2="960" y2="30"/>
+<line class="grid" x1="0" y1="70" x2="960" y2="70"/>
+<line class="grid" x1="0" y1="110" x2="960" y2="110"/>
+<line class="grid" x1="0" y1="150" x2="960" y2="150"/>
+<line class="grid" x1="0" y1="190" x2="960" y2="190"/>
+<line class="grid" x1="0" y1="230" x2="960" y2="230"/>
+<line class="grid" x1="0" y1="270" x2="960" y2="270"/>
+<line class="grid" x1="0" y1="310" x2="960" y2="310"/>
+<text class="title" x="36" y="40">FACTORY</text>
+<text class="small" x="36" y="58">one ticket in · one merged change out · you only decide</text>
+<text class="small" x="924" y="40" text-anchor="end">Architect · Mechanic · Observer on watch</text>
+<g transform="translate(0,22)">
+<rect class="body" x="192" y="72" width="14" height="24"/>
+<circle class="puff" cx="199" cy="66" r="7" style="animation-delay:0.00s"/>
+<circle class="puff" cx="199" cy="66" r="7" style="animation-delay:-1.07s"/>
+<circle class="puff" cx="199" cy="66" r="7" style="animation-delay:-2.14s"/>
+<rect class="arm press" x="163" y="150" width="14" height="22" style="animation-delay:-1.48s"/>
+<rect class="arm press" x="148" y="168" width="44" height="8" rx="2" style="animation-delay:-1.48s;fill:#58a6ff"/>
+<rect class="body" x="112" y="94" width="116" height="62" rx="8"/>
+<g class="gear "><polygon points="157.0,125.0 151.3,129.7 152.0,137.0 144.7,136.3 140.0,142.0 135.3,136.3 128.0,137.0 128.7,129.7 123.0,125.0 128.7,120.3 128.0,113.0 135.3,113.7 140.0,108.0 144.7,113.7 152.0,113.0 151.3,120.3" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="140" cy="125" r="4.8" fill="#484f58"/></g>
+<g class="gear r"><polygon points="177.0,136.0 173.3,139.0 173.8,143.8 169.0,143.3 166.0,147.0 163.0,143.3 158.2,143.8 158.7,139.0 155.0,136.0 158.7,133.0 158.2,128.2 163.0,128.7 166.0,125.0 169.0,128.7 173.8,128.2 173.3,133.0" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="166" cy="136" r="3.1" fill="#484f58"/></g>
+<circle class="lamp" cx="204" cy="116" r="6" fill="#58a6ff" style="animation-delay:-1.48s"/>
+<rect x="194" y="132" width="20" height="4" rx="2" fill="#30363d"/><rect x="194" y="140" width="13" height="4" rx="2" fill="#30363d"/>
+<text class="label" x="170" y="288">PLAN REVIEW</text>
+<rect class="arm press" x="323" y="150" width="14" height="22" style="animation-delay:-3.68s"/>
+<rect class="arm press" x="308" y="168" width="44" height="8" rx="2" style="animation-delay:-3.68s;fill:#f0b429"/>
+<rect class="body" x="272" y="94" width="116" height="62" rx="8"/>
+<g class="gear "><polygon points="317.0,125.0 311.3,129.7 312.0,137.0 304.7,136.3 300.0,142.0 295.3,136.3 288.0,137.0 288.7,129.7 283.0,125.0 288.7,120.3 288.0,113.0 295.3,113.7 300.0,108.0 304.7,113.7 312.0,113.0 311.3,120.3" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="300" cy="125" r="4.8" fill="#484f58"/></g>
+<g class="gear r"><polygon points="337.0,136.0 333.3,139.0 333.8,143.8 329.0,143.3 326.0,147.0 323.0,143.3 318.2,143.8 318.7,139.0 315.0,136.0 318.7,133.0 318.2,128.2 323.0,128.7 326.0,125.0 329.0,128.7 333.8,128.2 333.3,133.0" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="326" cy="136" r="3.1" fill="#484f58"/></g>
+<circle class="lamp" cx="364" cy="116" r="6" fill="#f0b429" style="animation-delay:-3.68s"/>
+<rect x="354" y="132" width="20" height="4" rx="2" fill="#30363d"/><rect x="354" y="140" width="13" height="4" rx="2" fill="#30363d"/>
+<text class="label" x="330" y="288">BUILD</text>
+<rect class="body" x="512" y="72" width="14" height="24"/>
+<circle class="puff" cx="519" cy="66" r="7" style="animation-delay:-0.80s"/>
+<circle class="puff" cx="519" cy="66" r="7" style="animation-delay:-1.87s"/>
+<circle class="puff" cx="519" cy="66" r="7" style="animation-delay:-2.94s"/>
+<rect class="arm press" x="483" y="150" width="14" height="22" style="animation-delay:-1.89s"/>
+<rect class="arm press" x="468" y="168" width="44" height="8" rx="2" style="animation-delay:-1.89s;fill:#bc8cff"/>
+<rect class="body" x="432" y="94" width="116" height="62" rx="8"/>
+<g class="gear "><polygon points="477.0,125.0 471.3,129.7 472.0,137.0 464.7,136.3 460.0,142.0 455.3,136.3 448.0,137.0 448.7,129.7 443.0,125.0 448.7,120.3 448.0,113.0 455.3,113.7 460.0,108.0 464.7,113.7 472.0,113.0 471.3,120.3" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="460" cy="125" r="4.8" fill="#484f58"/></g>
+<g class="gear r"><polygon points="497.0,136.0 493.3,139.0 493.8,143.8 489.0,143.3 486.0,147.0 483.0,143.3 478.2,143.8 478.7,139.0 475.0,136.0 478.7,133.0 478.2,128.2 483.0,128.7 486.0,125.0 489.0,128.7 493.8,128.2 493.3,133.0" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="486" cy="136" r="3.1" fill="#484f58"/></g>
+<circle class="lamp" cx="524" cy="116" r="6" fill="#bc8cff" style="animation-delay:-1.89s"/>
+<rect x="514" y="132" width="20" height="4" rx="2" fill="#30363d"/><rect x="514" y="140" width="13" height="4" rx="2" fill="#30363d"/>
+<text class="label" x="490" y="288">CODE REVIEW</text>
+<rect class="arm press" x="643" y="150" width="14" height="22" style="animation-delay:-0.09s"/>
+<rect class="arm press" x="628" y="168" width="44" height="8" rx="2" style="animation-delay:-0.09s;fill:#ff8f6b"/>
+<rect class="body" x="592" y="94" width="116" height="62" rx="8"/>
+<g class="gear "><polygon points="637.0,125.0 631.3,129.7 632.0,137.0 624.7,136.3 620.0,142.0 615.3,136.3 608.0,137.0 608.7,129.7 603.0,125.0 608.7,120.3 608.0,113.0 615.3,113.7 620.0,108.0 624.7,113.7 632.0,113.0 631.3,120.3" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="620" cy="125" r="4.8" fill="#484f58"/></g>
+<g class="gear r"><polygon points="657.0,136.0 653.3,139.0 653.8,143.8 649.0,143.3 646.0,147.0 643.0,143.3 638.2,143.8 638.7,139.0 635.0,136.0 638.7,133.0 638.2,128.2 643.0,128.7 646.0,125.0 649.0,128.7 653.8,128.2 653.3,133.0" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="646" cy="136" r="3.1" fill="#484f58"/></g>
+<circle class="lamp" cx="684" cy="116" r="6" fill="#ff8f6b" style="animation-delay:-0.09s"/>
+<rect x="674" y="132" width="20" height="4" rx="2" fill="#30363d"/><rect x="674" y="140" width="13" height="4" rx="2" fill="#30363d"/>
+<text class="label" x="650" y="288">YOU TRY IT</text>
+<rect class="body" x="832" y="72" width="14" height="24"/>
+<circle class="puff" cx="839" cy="66" r="7" style="animation-delay:-1.60s"/>
+<circle class="puff" cx="839" cy="66" r="7" style="animation-delay:-2.67s"/>
+<circle class="puff" cx="839" cy="66" r="7" style="animation-delay:-3.74s"/>
+<rect class="arm press" x="803" y="150" width="14" height="22" style="animation-delay:-2.30s"/>
+<rect class="arm press" x="788" y="168" width="44" height="8" rx="2" style="animation-delay:-2.30s;fill:#3fb950"/>
+<rect class="body" x="752" y="94" width="116" height="62" rx="8"/>
+<g class="gear "><polygon points="797.0,125.0 791.3,129.7 792.0,137.0 784.7,136.3 780.0,142.0 775.3,136.3 768.0,137.0 768.7,129.7 763.0,125.0 768.7,120.3 768.0,113.0 775.3,113.7 780.0,108.0 784.7,113.7 792.0,113.0 791.3,120.3" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="780" cy="125" r="4.8" fill="#484f58"/></g>
+<g class="gear r"><polygon points="817.0,136.0 813.3,139.0 813.8,143.8 809.0,143.3 806.0,147.0 803.0,143.3 798.2,143.8 798.7,139.0 795.0,136.0 798.7,133.0 798.2,128.2 803.0,128.7 806.0,125.0 809.0,128.7 813.8,128.2 813.3,133.0" fill="none" stroke="#484f58" stroke-width="2" stroke-linejoin="round"/><circle cx="806" cy="136" r="3.1" fill="#484f58"/></g>
+<circle class="lamp" cx="844" cy="116" r="6" fill="#3fb950" style="animation-delay:-2.30s"/>
+<rect x="834" y="132" width="20" height="4" rx="2" fill="#30363d"/><rect x="834" y="140" width="13" height="4" rx="2" fill="#30363d"/>
+<text class="label" x="810" y="288">SHIP</text>
+<rect class="belt" x="30" y="232" width="900" height="26" rx="13"/>
+<line class="tread" x1="44" y1="245" x2="916" y2="245"/>
+<circle class="wheel" cx="43" cy="245" r="9"/>
+<circle class="wheel" cx="917" cy="245" r="9"/>
+<g class="card" style="animation-delay:0s"><rect class="face" x="0" y="196" width="70" height="36" rx="6" style="animation-delay:0s"/><text class="ctext" x="9" y="218">T-101</text><path class="tick" d="M50 213 l5 5 l9 -10" style="animation-delay:0s"/></g>
+<g class="card" style="animation-delay:-4s"><rect class="face" x="0" y="196" width="70" height="36" rx="6" style="animation-delay:-4s"/><text class="ctext" x="9" y="218">T-102</text><path class="tick" d="M50 213 l5 5 l9 -10" style="animation-delay:-4s"/></g>
+<g class="card" style="animation-delay:-8s"><rect class="face" x="0" y="196" width="70" height="36" rx="6" style="animation-delay:-8s"/><text class="ctext" x="9" y="218">T-103</text><path class="tick" d="M50 213 l5 5 l9 -10" style="animation-delay:-8s"/></g>
+<rect class="bg" x="0" y="186" width="26" height="52"/><rect class="bg" x="934" y="186" width="26" height="52"/>
+<circle class="merged" cx="905" cy="300" r="6" fill="#3fb950" style="animation-delay:-2.2s"/><text class="small" x="893" y="304" text-anchor="end">merged to main</text>
+<text class="small" x="36" y="304">queued in a swimlane</text>
+</g>
+</svg>

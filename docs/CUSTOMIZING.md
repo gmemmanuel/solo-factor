@@ -20,7 +20,7 @@ there is to decide and where each kind of change belongs.
 | How tickets move, what the inbox does, the page | `src/factory/engine.ts`, `app.tsx`, with tests | everything |
 
 After changing a skill or code in your clone: `npm run verify`, then
-`bb plugin build` and `bb plugin reload bbonductor`.
+`bb plugin build` and `bb plugin reload solo-factor`.
 
 ## Decisions to make on day one
 

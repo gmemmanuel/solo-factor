@@ -333,7 +333,7 @@ export default async function plugin(bb: BbPluginApi) {
         const replies = new Set<string>();
         for (const block of context.input.blocks as readonly { type?: string; mentions?: readonly { resource?: { kind?: string; pluginId?: string; itemId?: string } }[] }[]) {
           for (const mention of block.mentions ?? []) {
-            const itemId = mention.resource?.kind === "plugin" && mention.resource.pluginId === "bbonductor" ? (mention.resource.itemId ?? "") : "";
+            const itemId = mention.resource?.kind === "plugin" && mention.resource.pluginId === "solo-factor" ? (mention.resource.itemId ?? "") : "";
             const entryId = /inb_[a-z0-9]+/.exec(itemId)?.[0];
             if (entryId !== undefined) replies.add(entryId);
           }
@@ -660,7 +660,7 @@ const toolResult = async (work: () => Promise<string>) => {
 
   // ------------------------------------------------------------ inbound hook
   //
-  // POST /api/v1/plugins/bbonductor/http/prompt  (header x-bb-plugin-token)
+  // POST /api/v1/plugins/solo-factor/http/prompt  (header x-bb-plugin-token)
   //   { "projectId": "proj_…", "agent": "watch", "text": "New feedback row 123" }
   // Lets a service you control (a deployed function, a CI job) wake a standing
   // agent the moment something happens. Callers should send references such as

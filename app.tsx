@@ -25,11 +25,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const CHANGED = "factory-changed";
-const PROJECT_KEY = "bbonductor.factory.project";
+const PROJECT_KEY = "solo-factor.factory.project";
 const INBOX_ARRIVED = "factory-inbox-arrived";
-const CHIME_KEY = "bbonductor.factory.chime";
-const OPEN_KEY = "bbonductor.factory.inbox.open";
-const PANEL_WIDTH_KEY = "bbonductor.factory.inbox.width";
+const CHIME_KEY = "solo-factor.factory.chime";
+const OPEN_KEY = "solo-factor.factory.inbox.open";
+const PANEL_WIDTH_KEY = "solo-factor.factory.inbox.width";
 const PANEL_DEFAULT = 544;
 const PANEL_MIN = 360;
 /** The inbox list keeps at least this much room beside the panel. */
@@ -232,7 +232,7 @@ interface ReplyDraft {
   text: string;
   attachments: Attachment[];
 }
-const DRAFT_KEY = "bbonductor.factory.draft.";
+const DRAFT_KEY = "solo-factor.factory.draft.";
 const NO_DRAFT: ReplyDraft = { text: "", attachments: [] };
 const isBlank = (draft: ReplyDraft) => draft.text.trim() === "" && draft.attachments.length === 0;
 
@@ -414,7 +414,7 @@ interface Catalog {
  * What the founder was asked, shown above the composer of the thread it is
  * about, so the thread they open to answer in shows the question.
  */
-const BANNER_OPEN_KEY = "bbonductor.banner.open";
+const BANNER_OPEN_KEY = "solo-factor.banner.open";
 
 /** The question in full in the Reply pill; only a very long one is shortened, at a word. */
 function replyLabel(question: string): string {
@@ -1734,7 +1734,7 @@ function SettingsPage() {
 // go between the inbox, the swimlanes and the agents without the thread list.
 
 const AGENT_ORDER = ["orchestrator", "watch", "deploy", "integrator", "harness-improver", "cleaner"];
-const AGENT_KEY = "bbonductor.agents.open";
+const AGENT_KEY = "solo-factor.agents.open";
 
 function useAgents() {
   const { rpc, state, error, run } = useFactory();
@@ -1979,11 +1979,11 @@ button[aria-label^="Swimlanes,"][aria-label$=" moving"] [data-nav-rail-badge] sp
 button[aria-label^="Swimlanes,"][aria-label$=" moving"] [data-nav-rail-badge]:empty,
 button[aria-label^="Agents,"][aria-label$=" working"] [data-nav-rail-badge] span,
 button[aria-label^="Agents,"][aria-label$=" working"] [data-nav-rail-badge]:empty { background: #10b981 !important; }
-.prompt-mention-pill[data-prompt-mention-resource*='"pluginId":"bbonductor"'] { border-radius: 0.5rem; white-space: normal; }
-.prompt-mention-pill[data-prompt-mention-resource*='"pluginId":"bbonductor"'] .truncate { overflow: visible; text-overflow: clip; white-space: normal; }
+.prompt-mention-pill[data-prompt-mention-resource*='"pluginId":"solo-factor"'] { border-radius: 0.5rem; white-space: normal; }
+.prompt-mention-pill[data-prompt-mention-resource*='"pluginId":"solo-factor"'] .truncate { overflow: visible; text-overflow: clip; white-space: normal; }
 `;
 function ReplyPillStyle() {
-  return <style data-bbonductor-reply-pill="">{REPLY_PILL_CSS}</style>;
+  return <style data-solo-factor-reply-pill="">{REPLY_PILL_CSS}</style>;
 }
 
 /**

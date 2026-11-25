@@ -32,8 +32,8 @@ Founder ──► Architect (standing thread, main checkout)
 | Events | `server.ts` | `thread.idle`, `thread.active`, `thread.failed`, `thread.archived`, `thread.deleted`, `interaction.pending` |
 | Agent tools | `server.ts` | `factory_stage_done`, `factory_ask_founder`, `factory_message`, `factory_enqueue`, `factory_status` |
 | CLI | `src/factory/cli.ts` | `bb factory …`, the same operations for agents and scripts |
-| Inbound hook | `server.ts` | `POST /api/v1/plugins/bbonductor/http/prompt` with the plugin token wakes a standing agent. Reachable from this machine only; bb's public address puts its own sign-in in front |
-| Page | `app.tsx` | Nav panel at `/plugins/bbonductor/factory`, with an inbox count on the rail. An inbox answer is sent from the thread's own composer (a hidden `ThreadChat`), with the factory's context in an agent-only mention pill (`bb.ui.registerMentionProvider`, provider `inbox-answer`) |
+| Inbound hook | `server.ts` | `POST /api/v1/plugins/solo-factor/http/prompt` with the plugin token wakes a standing agent. Reachable from this machine only; bb's public address puts its own sign-in in front |
+| Page | `app.tsx` | Nav panel at `/plugins/solo-factor/factory`, with an inbox count on the rail. An inbox answer is sent from the thread's own composer (a hidden `ThreadChat`), with the factory's context in an agent-only mention pill (`bb.ui.registerMentionProvider`, provider `inbox-answer`) |
 | Skills | `skills/` | `factory` (worker protocol); charters: `factory-orchestrator` (Architect), `factory-harness-improver` (Mechanic), `factory-watch` (Observer), `factory-deploy` (Deployer), `factory-integrator`, `factory-cleaner`, `factory-issue-owner`, `factory-contacts`; process defaults: `factory-debug`, `factory-plan`, `factory-review-plan`, `factory-build`, `factory-review-code`, `factory-ship`; and `factory-onboarding` |
 | Project profile | `templates/FACTORY.md` | Copied into a project by onboarding. Every bundled skill reads the project's copy first |
 | Packs | `packs/` | Stack-specific skills copied into a project (`mobile`) |

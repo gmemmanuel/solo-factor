@@ -1,5 +1,7 @@
 # Factory
 
+<p align="center"><img src="docs/assets/factory.svg" alt="Tickets ride a conveyor belt through five stations: plan review, build, code review, you try it, and ship. Each leaves merged." width="100%"></p>
+
 **A software factory for a solo founder, as a [bb](https://getbb.app) plugin.**
 Tickets move through plan, plan review, build, code review and ship without
 you carrying them from agent to agent. Every stage is a fresh agent on the
@@ -218,12 +220,6 @@ Read [AGENTS.md](AGENTS.md) before changing anything, then
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [LEARNINGS.md](LEARNINGS.md),
 which records what bb's plugin SDK does that its documentation does not
 make obvious.
-
-## Name
-
-The plugin id is `bbonductor`: bb plus the hand-run, Conductor-style
-workflow this replaced. It is an independent project, not affiliated with bb,
-Conductor or Melty Labs.
 
 ## License
 

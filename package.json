@@ -1,5 +1,5 @@
 {
-  "name": "bb-plugin-bbonductor",
+  "name": "bb-plugin-solo-factor",
   "version": "0.3.0",
   "description": "A software factory for a solo founder, on bb: swimlanes, a staged pipeline of independent agents with a model per role, one inbox for decisions, standing agents, and editable process skills.",
   "type": "module",

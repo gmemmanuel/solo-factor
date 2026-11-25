@@ -44,7 +44,7 @@ function setup() {
   /** Who started each thread's latest turn. */
   const lastTurn = new Map<string, "user" | "agent" | "plugin">();
   const host = createFakePluginHost({
-    pluginId: "bbonductor",
+    pluginId: "solo-factor",
     agentSkillIds: ["factory", "factory-orchestrator", "factory-issue-owner", "factory-deploy", "factory-harness-improver", "factory-watch", "factory-cleaner", "factory-integrator", "factory-contacts", "factory-onboarding", "factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship", "factory-tracker", "factory-sequence"],
     sdk: {
       projects: {
@@ -81,7 +81,7 @@ function setup() {
         events: {
           list: async (args: { threadId: string }) =>
             lastTurn.has(args.threadId)
-              ? [{ type: "client/turn/requested", createdAt: Date.now(), data: { initiator: lastTurn.get(args.threadId) === "agent" ? "agent" : "user", senderThreadId: null, originPluginId: lastTurn.get(args.threadId) === "plugin" ? "bbonductor" : null } }]
+              ? [{ type: "client/turn/requested", createdAt: Date.now(), data: { initiator: lastTurn.get(args.threadId) === "agent" ? "agent" : "user", senderThreadId: null, originPluginId: lastTurn.get(args.threadId) === "plugin" ? "solo-factor" : null } }]
               : [],
         },
         send: async (args: { threadId: string; input: { text: string }[]; senderThreadId?: string }) => {
@@ -480,7 +480,7 @@ describe("a ticket's issue owner fields everything about it", () => {
     await hook(makeMessageDispatchHookContext({
       thread: { id: "th_1", projectId: PROJECT },
       initiator: "user", senderThreadId: null, originPluginId: null,
-      input: { text: "Done.", blocks: [{ type: "text", text: "Done.", mentions: [{ start: 0, end: 0, resource: { kind: "plugin", pluginId: "bbonductor", itemId: entry.id, label: "Inbox answer" } }] } as never] },
+      input: { text: "Done.", blocks: [{ type: "text", text: "Done.", mentions: [{ start: 0, end: 0, resource: { kind: "plugin", pluginId: "solo-factor", itemId: entry.id, label: "Inbox answer" } }] } as never] },
     }));
     await new Promise((resolve) => setTimeout(resolve, 30));
     expect((await t.state()).inbox).toHaveLength(0);
@@ -562,7 +562,7 @@ describe("a ticket's issue owner fields everything about it", () => {
     await send("Also, can you look at the Observer's report?");
     expect((await t.state()).inbox).toHaveLength(2);
     // A Reply from the banner carries one question's pill: that one closes.
-    await send("B.", [{ start: 0, end: 0, resource: { kind: "plugin", pluginId: "bbonductor", itemId: first!.id, label: "Reply" } }]);
+    await send("B.", [{ start: 0, end: 0, resource: { kind: "plugin", pluginId: "solo-factor", itemId: first!.id, label: "Reply" } }]);
     expect((await t.state()).inbox.map((entry) => entry.id)).toEqual([second!.id]);
     // The agent closes the other once it is settled in conversation.
     expect(await t.tool("factory_close_ask", agent, { entry_id: second!.id })).toContain("Closed");
@@ -578,7 +578,7 @@ describe("a ticket's issue owner fields everything about it", () => {
       Promise.resolve(hook(makeMessageDispatchHookContext({ thread: { id: "th_1", projectId: PROJECT }, attempt: "join-turn", ...overrides })));
     // An agent's message, or one a plugin sent, is not their answer; both proceed.
     expect(await dispatch({ initiator: "agent", senderThreadId: "th_9", originPluginId: null })).toEqual({ action: "proceed" });
-    expect(await dispatch({ initiator: "user", senderThreadId: null, originPluginId: "bbonductor" })).toEqual({ action: "proceed" });
+    expect(await dispatch({ initiator: "user", senderThreadId: null, originPluginId: "solo-factor" })).toEqual({ action: "proceed" });
     await new Promise((resolve) => setTimeout(resolve, 30));
     expect((await t.state()).inbox).toHaveLength(1);
     // Their own message, steered into the running turn.

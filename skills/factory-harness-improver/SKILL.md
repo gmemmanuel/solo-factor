@@ -124,8 +124,8 @@ they send as evidence.
   pass both suites, and open a pull request. If the founder would notice the
   change, ask them in the inbox before you merge, with what they see today and
   after. Once merged, make their bb pick it up: in a local clone,
-  `bb plugin build` then `bb plugin reload bbonductor`; for an install that
-  tracks a git branch, `bb plugin update bbonductor --yes`. Log the session
+  `bb plugin build` then `bb plugin reload solo-factor`; for an install that
+  tracks a git branch, `bb plugin update solo-factor --yes`. Log the session
   in its work log.
 - **The scripts:** change them in `kit/` with a test (`npm run test:kit`),
   then reinstall into each project with `node kit/install.mjs <project>`.

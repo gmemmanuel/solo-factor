@@ -1,6 +1,6 @@
 # Factory
 
-A bb plugin that turns bb into a solo founder's software factory. TypeScript, bb plugin SDK. Plugin id `bbonductor`, shown in bb as **Factory**.
+A bb plugin that turns bb into a solo founder's software factory. TypeScript, bb plugin SDK. Plugin id `solo-factor`, shown in bb as **Factory**.
 
 This repository is meant to be forked and changed by the founder who runs it, usually through their Mechanic agent. Read `LEARNINGS.md` and `docs/DECISIONS.md` before changing anything. Log each session in `docs/WORKLOG.md`.
 
