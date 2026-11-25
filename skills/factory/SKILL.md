@@ -1,0 +1,140 @@
+---
+name: factory
+description: How threads work inside the software factory. Use when you are running a factory stage for a ticket, are a standing factory agent, or need to queue work, report a stage, message another agent, or ask the founder for a decision.
+---
+
+# Working in the factory
+
+The factory moves tickets through a pipeline of stages (for example plan,
+review plan, build, review code, ship). Each stage runs in its own thread, in
+the ticket's own worktree, on the model chosen for that stage's role. Nobody
+watches your thread. The factory learns what happened only from what you
+report.
+
+**Read `FACTORY.md` in the project root before you start.** It is the project
+profile: the commands that verify work, where plans and tickets live, what
+agents may do unasked, what the founder must try, and which skill each stage
+uses. If it does not exist, the factory has not been set up here: say so in
+a `blocked` report (a standing agent runs `factory-onboarding` instead).
+
+## If you are running a stage
+
+Your first message names the ticket, the stage, and the project skill to use.
+Do that work to the project's own standard. Then report exactly once:
+
+| Situation | What to call |
+|---|---|
+| The stage is completely finished | `factory_stage_done` with `outcome: "complete"` |
+| You are a reviewer and the author must change something you cannot land yourself | `factory_stage_done` with `outcome: "changes_requested"` |
+| You think the founder must decide | `factory_ask_founder`, then end your turn. It goes to the ticket's issue owner first, who may answer it |
+| Something must go back to the planner (the ticket's issue owner) | `factory_ask_planner`, then end your turn |
+| You cannot proceed for another reason | `factory_stage_done` with `outcome: "blocked"` |
+
+Rules:
+
+- **Write the summary for a reader with no access to this thread.** Say what
+  was done, where it lives (branch, plan path, commit), what was verified and
+  how, and what is left. The next stage starts from that text.
+- **Do not start the next stage, and do not launch your own reviewer.** The
+  factory starts both, in fresh threads, so a review is always independent.
+- **Findings come back to you.** If a reviewer requests changes, they arrive
+  in this thread. Address them and call `factory_stage_done` again. Pass
+  `rereview: true` only when your fixes raise a new product or scope decision;
+  one review pass is the design.
+- **Every ticket has an issue owner: the agent that reviewed its plan.** It
+  is the "planner" your project's process refers to. When a question, a
+  blocker or a contract problem goes back to the planner, call
+  `factory_ask_planner` with the full handoff. It reaches the owner's thread,
+  its answer arrives here, and the two of you go back and forth as often as
+  needed. If you are the issue owner, the `factory-issue-owner` skill is your
+  charter.
+- **The founder tries UI changes, and tickets they flagged, before they ship.**
+  Pass `founder_check` with `factory_stage_done` only if your ticket changes
+  what a screen looks like or says, or the founder asked to review this ticket
+  before release (its brief, ticket note or tracker ticket says so). Changes
+  users notice only through behaviour, such as backend logic, prompts, data
+  or tooling, ship without it. Write it for them: exactly what
+  changed, screen by screen; the branch; how to run it; a dev account that
+  shows the change, either one that exists or one you seeded for this, with
+  how to sign in (keep its email short enough to type on a phone, at most 20
+  characters: `1006@t.qa / pw`); and numbered steps saying what they should see at each.
+  Attach ONE side-by-side image in `before_after`: every changed screen,
+  before on the left and after on the right (the project's preview harness
+  writes it, when `FACTORY.md` names one). They judge from it
+  whether the ticket is ready to test, and sometimes instead of testing, so
+  the factory refuses a check without it unless `no_screenshots` says nothing
+  on screen changed. A check already waiting without one gets it with
+  `factory_check_images`. Ship
+  starts only after they approve. If the founder sends notes, the notes go to the issue
+  owner, who sends the builder what to change. Your next report must then
+  carry an updated `founder_check`, or `founder_check_withdrawn` with why they
+  no longer need to try it; the factory refuses it otherwise, so they are never
+  shown the old check again.
+- **The last review writes what changed.** If no review stage follows yours,
+  pass `change_note` with `factory_stage_done` (from the command line,
+  `--before`, `--after`, `--why`). The founder reads it from the ticket's
+  card after it merges, often days later and with nothing else open, so write
+  it for them: before (what users saw, or what the system did), after (what
+  they see or it does now) and why, in plain words with a real example and
+  real numbers where you have them. No file names, ticket numbers or internal
+  labels. The factory refuses your report without it.
+- **The issue owner stands between you and the founder.** A blocked report
+  or a founder question reaches it first. It may answer you itself (budgets,
+  technical choices, anything the plan or the project's rules settle) or take
+  it to the founder in plain words. Either way the reply arrives in this
+  thread.
+- **Small bugs may ride with your ticket.** Your first message lists them.
+  Fix each in the same workspace and branch, as its own commit; review and
+  ship them with the ticket. They get no plan, branch or CI run of their own.
+- **Ask the founder only for founder decisions:** product behavior, scope,
+  approval of a mockup, or a contradiction with a recorded decision. Give the situation, the options
+  with what the user would see in each, and your recommendation. Decide
+  technical choices yourself.
+- If you stop without reporting, the factory reminds you once, then tells the
+  founder the ticket has stalled.
+
+## Talking to other agents
+
+`factory_message` delivers a message to another factory thread:
+
+- `to: "orchestrator"` (or another standing agent's id)
+- `to: "APP-12"` for the thread running that ticket's current stage
+- `to: "APP-12:build"` for a specific stage's thread
+
+Use it for facts the other agent needs. A message is not a handoff: stages
+still end with `factory_stage_done`.
+
+## The command line
+
+Every tool has a `bb factory` equivalent, which also works from threads that
+are not part of the factory:
+
+```sh
+bb factory status                      # lanes, tickets, inbox
+bb factory enqueue APP-12 "Title" --lane Checkout --pipeline planned --brief "…"
+bb factory lanes '{"lanes":[{"name":"Checkout","items":[{"key":"APP-12","title":"…"}]}]}'
+bb factory sync '{"lanes":[…]}'        # make lanes match a schedule; never reorders a lane
+bb factory move APP-12 --lane Plan --position 1
+bb factory advance APP-12              # send a ticket on to its next stage
+bb factory cancel APP-12
+bb factory done --outcome complete --summary "…"
+bb factory ask "Question?" --option "A: …" --option "B: …" --recommend "A, because …"
+bb factory message orchestrator "…"
+bb factory inbox
+bb factory prompt watch "…"            # hand a standing agent a prompt; starts it if needed
+bb factory role ship --provider codex --model <id> --reasoning low
+bb factory config
+```
+
+Add `--json` for machine-readable output and `--project <id>` outside a
+project thread.
+
+## Swimlanes
+
+A lane works one ticket at a time, in order; lanes run side by side, up to the
+configured number of tickets in flight. Put tickets in the same lane when they
+would collide: the same files, the same deployed function, or one depending on
+the other. Put independent tickets in different lanes.
+
+Pipelines choose where a ticket starts. `bb factory config` lists them; a
+ticket that already has a reviewed plan does not need the planning stages.

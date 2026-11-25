@@ -1,0 +1,258 @@
+// Shared shapes for the factory. Server and app both import from here; the app
+// imports types only, so nothing in this file may touch Node APIs.
+import { z } from "zod";
+
+/** Which model plays a role. Empty strings mean "use the project's default". */
+export const roleSchema = z.object({
+  label: z.string().min(1).max(60),
+  providerId: z.string().max(80).default(""),
+  model: z.string().max(120).default(""),
+  reasoningLevel: z.string().max(40).default(""),
+  permissionMode: z.enum(["", "accept-edits", "auto", "full"]).default(""),
+  /**
+   * Where this role's work goes when its model hits a usage limit: a model,
+   * on this provider or (when `fallbackProviderId` is set) another one. An
+   * empty model means no fallback: the limit lands in the founder's inbox.
+   */
+  fallbackProviderId: z.string().max(80).default(""),
+  fallbackModel: z.string().max(120).default(""),
+  fallbackReasoningLevel: z.string().max(40).default(""),
+});
+export type Role = z.infer<typeof roleSchema>;
+
+/** One step of a pipeline. `prompt` supports {key} {title} {brief} {previous} {lane}. */
+export const stageSchema = z.object({
+  label: z.string().min(1).max(60),
+  role: z.string().min(1),
+  prompt: z.string().min(1).max(8000),
+  /** This stage does not start until the founder approves a recorded check. */
+  founderGate: z.boolean().default(false),
+  /** A review stage sends requested changes back to the stage before it. */
+  review: z.boolean().default(false),
+  /**
+   * The thread that runs this stage owns the ticket from then on: it is the
+   * only thread that may put the ticket in front of the founder, and every
+   * other stage brings its questions to it.
+   */
+  owner: z.boolean().default(false),
+  /**
+   * Roles for tickets whose plan declares an implementer tier, keyed "1".."3";
+   * "ui:1" and "ui:2" are the UI builder's (a UI plan has no tier 3).
+   * A ticket with no tier, or a tier not listed, uses `role`.
+   */
+  tierRoles: z.record(z.string(), z.string()).default({}),
+});
+export type Stage = z.infer<typeof stageSchema>;
+
+/** A long-lived agent with a fixed job, pinned in the project's main checkout. */
+export const standingAgentSchema = z.object({
+  label: z.string().min(1).max(60),
+  role: z.string().min(1),
+  /** The plugin skill that holds this agent's charter. */
+  skill: z.string().min(1),
+  /** Repo-relative file the agent keeps as its rolling memory. */
+  memoryPath: z.string().min(1).max(300),
+});
+export type StandingAgent = z.infer<typeof standingAgentSchema>;
+
+export const configSchema = z.object({
+  roles: z.record(z.string(), roleSchema),
+  stages: z.record(z.string(), stageSchema),
+  pipelines: z.record(z.string(), z.array(z.string()).min(1)),
+  defaultPipeline: z.string().min(1),
+  /** Tickets being worked at once, across all lanes. */
+  maxActiveItems: z.number().int().min(1).max(64),
+  agents: z.record(z.string(), standingAgentSchema),
+  /** Where a ticket is tracked, with {key} for its number. Empty means no link. */
+  ticketUrl: z.string().max(300).default(""),
+  /** The founder's order for the standing agents in the Agents list. */
+  agentOrder: z.array(z.string()).default([]),
+});
+export type Config = z.infer<typeof configSchema>;
+
+export const ITEM_STATUSES = [
+  "queued",
+  "running",
+  "needs-founder",
+  "with-owner",
+  // Saved by earlier versions; both mean what "with-owner" means now.
+  "with-planner",
+  "triage",
+  "returned",
+  "stalled",
+  "failed",
+  "done",
+  "archived",
+  "cancelled",
+] as const;
+export type ItemStatus = (typeof ITEM_STATUSES)[number];
+
+export const attachmentSchema = z.object({
+  type: z.enum(["localFile", "localImage"]),
+  path: z.string().min(1),
+  name: z.string().min(1),
+  mimeType: z.string().optional(),
+  sizeBytes: z.number().optional(),
+  sourceProjectId: z.string().optional(),
+});
+export type Attachment = z.infer<typeof attachmentSchema>;
+
+export const itemSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  key: z.string(),
+  title: z.string(),
+  brief: z.string(),
+  lane: z.string(),
+  position: z.number(),
+  pipeline: z.string(),
+  /** The plan's implementer tier (1 to 3), when it declares one. */
+  tier: z.number().int().min(1).max(3).nullable().default(null),
+  /** Which builder the plan names: UI work runs on the UI builder roles (founder, 22 Nov 2026). */
+  builder: z.enum(["ui", "fullstack"]).nullable().default(null),
+  /**
+   * Tickets this one must wait for (a dependency, or another lane's ticket on
+   * the same files), as the schedule says; replaced on every sync. A queued
+   * ticket with any never starts.
+   */
+  waitingOn: z.array(z.string()).default([]),
+  stageIndex: z.number().int(),
+  status: z.enum(ITEM_STATUSES),
+  environmentId: z.string().nullable(),
+  /** stage id -> thread id of the latest thread that ran it. */
+  threads: z.record(z.string(), z.string()),
+  /** Review stages already passed once; skipped when the author finishes fixes. */
+  passedReviews: z.array(z.string()),
+  lastSummary: z.string(),
+  /** The stage's thread is in a turn right now (drives the activity mark). */
+  working: z.boolean().default(false),
+  /** Parked by the founder ("Later"): shown in its lane, never started. */
+  parked: z.boolean().default(false),
+  /** What the founder must try before this ships, and whether they approved it. */
+  /** Reopened for rework after review (founder notes or follow-up): its next report runs the review again. */
+  reworked: z.boolean().default(false),
+  founderCheck: z
+    .object({
+      text: z.string(),
+      approved: z.boolean(),
+      /** They sent notes on it: the next report must replace it or withdraw it. */
+      returned: z.boolean().default(false),
+      /** The test account they sign in with ("email / password"); the project's Run script signs the dev build into it. */
+      account: z.string().default(""),
+      /** Before/after renders of the changed screens, shown above the steps (founder, 25 Nov 2026). */
+      screenshots: z.array(attachmentSchema).default([]),
+    })
+    .nullable()
+    .default(null),
+  /**
+   * What changed, for the founder to read after it ships: written by the
+   * ticket's final review stage (founder, 22 November 2026).
+   */
+  changeNote: z
+    .object({ before: z.string(), after: z.string(), why: z.string(), by: z.string(), at: z.number() })
+    .nullable()
+    .default(null),
+  /**
+   * The issue owner's thread, when the ticket is waiting on it, and whether it
+   * was reminded. `check` marks the founder's notes on a held check: the owner
+   * decides what happens to them.
+   */
+  consult: z.object({ threadId: z.string(), nudged: z.boolean(), check: z.boolean().default(false) }).nullable().default(null),
+  /** An owner started outside the pipeline, for a ticket whose plan was reviewed elsewhere. */
+  ownerThreadId: z.string().nullable().default(null),
+  /** What the owner must not forget. It is sent back with everything the factory hands it. */
+  ownerNote: z.string().default(""),
+  /** Small bugs built, reviewed and shipped with this ticket, in its workspace. */
+  riders: z.array(z.object({ key: z.string(), title: z.string(), brief: z.string() })).default([]),
+  /** Thread that queued this ticket; review findings with no author stage go here. */
+  originThreadId: z.string().nullable(),
+  /** The owner's thread has been told it is the owner. False for threads that predate owners. */
+  ownerBriefed: z.boolean().default(false),
+  nudged: z.boolean(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+export type Item = z.infer<typeof itemSchema>;
+
+export const INBOX_KINDS = [
+  "question",
+  "interaction",
+  "stalled",
+  "failed",
+  "blocked",
+  "check",
+  "test",
+  "todo",
+] as const;
+export type InboxKind = (typeof INBOX_KINDS)[number];
+
+/** A file the founder attached to an answer, as bb's upload returned it. */
+
+export const inboxSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  threadId: z.string(),
+  itemId: z.string().nullable(),
+  /** Who is asking, in plain words: "Build · APP-12" or "Orchestrator". */
+  from: z.string(),
+  kind: z.enum(INBOX_KINDS),
+  question: z.string(),
+  context: z.string(),
+  options: z.array(z.string()),
+  recommendation: z.string(),
+  status: z.enum(["open", "answered", "dismissed"]),
+  answer: z.string(),
+  createdAt: z.number(),
+  resolvedAt: z.number().nullable(),
+});
+export type InboxEntry = z.infer<typeof inboxSchema>;
+
+export const agentStateSchema = z.object({
+  agentId: z.string(),
+  projectId: z.string(),
+  threadId: z.string().nullable(),
+  startedAt: z.number().nullable(),
+  /** The current thread has been asked to hand off and will be replaced. */
+  rotating: z.boolean().default(false),
+});
+export type AgentState = z.infer<typeof agentStateSchema>;
+
+/** What a thread is to the factory, kept in its plugin metadata. */
+export type ThreadBinding =
+  | { kind: "stage"; itemId: string; stage: string }
+  | { kind: "owner"; itemId: string }
+  | { kind: "agent"; agentId: string; projectId: string };
+
+export function fillTemplate(
+  template: string,
+  values: Record<string, string>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    Object.prototype.hasOwnProperty.call(values, name)
+      ? (values[name] ?? "")
+      : match,
+  );
+}
+
+/** The pipeline for a fix too small to plan. It rides with a planned ticket when one is coming up. */
+export const SMALL_BUG_PIPELINE = "small-bug";
+
+/** Waiting on the ticket's issue owner, under this name or an earlier one. */
+export const WITH_OWNER: ReadonlySet<ItemStatus> = new Set(["with-owner", "with-planner", "triage"]);
+
+/** The role a stage runs a ticket on: its builder kind and tier pick it. */
+export function stageRoleId(stage: { role: string; tierRoles: Record<string, string> }, item: { tier: number | null; builder?: "ui" | "fullstack" | null } | null): string {
+  const tier = item?.tier ?? null;
+  if (item?.builder === "ui") {
+    const ui = stage.tierRoles[`ui:${tier === null ? 1 : Math.min(tier, 2)}`] ?? stage.tierRoles["ui:1"];
+    if (ui !== undefined) return ui;
+  }
+  return stage.tierRoles[String(tier ?? "")] ?? stage.role;
+}
+
+/**
+ * The Integrator's lane (founder, 23 Nov 2026): its maintenance tickets are
+ * real tickets with a swimlane, but the Architect's schedule does not own
+ * them, so a schedule sync never cancels or moves what is queued here.
+ */
+export const MAINTENANCE_LANE = "Maintenance";
