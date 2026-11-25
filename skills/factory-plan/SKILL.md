@@ -97,17 +97,21 @@ everything else. UI plans are Tier 1 or 2.
 
 ## The plan document
 
-Location and naming come from `FACTORY.md` ("Plans"); the default is
-`docs/plans/<KEY> - short title.md`. Use [TEMPLATE.md](TEMPLATE.md) in this
+`node scripts/factory/plan-doc.mjs --plan-dir` prints the only place plans
+live. Name the file `<KEY> - short title.md` and keep the standalone
+`Branch:` line exact: it is how every later stage finds this plan (for work
+with no ticket, it is the only way). Use [TEMPLATE.md](TEMPLATE.md) in this
 skill's folder. Rules for filling it:
 
 - **Product explanation** is for the founder, with no code terms: what a
   user experiences today, what they will after, and why it is worth
   building. Three to six sentences. If you cannot write it plainly, the
   scope is wrong. Repeat it in your report.
-- **Surfaces** lists every file the plan creates, modifies or deletes. The
-  Architect uses it to decide which tickets can run side by side; a missing
-  file sends two branches into the same code.
+- **Surfaces** lists every file the plan creates, modifies or deletes, one
+  per list item. The scheduler reads it to decide which tickets can run
+  side by side; a missing file sends two branches into the same code.
+  `node scripts/factory/plan-surfaces.mjs "<plan file>"` must pass before
+  the plan is done.
 - **Callers and entrances.** For every function whose behaviour changes,
   list each caller and each path into it, and what happens on that path
   after the change. Include indirect ones: stored data read back through
@@ -131,7 +135,11 @@ skill's folder. Rules for filling it:
 
 ## When the plan is written
 
-- Do what `FACTORY.md` says to the tracker (a label, a state), if anything.
+- With a tracker, add the "Plan written" label (`factory-tracker` skill).
+- Run `node scripts/factory/sequence.mjs refresh` so the swimlanes include
+  this plan. Exit 3 means the ticket has no lane yet: the Architect places
+  it with the `factory-sequence` skill (if you are not the Architect, say so
+  in your report).
 - **Report** with the product explanation, any product question in the
   shape below, and the last line `Implementer tier: Tier N` plus the builder.
   In a factory stage, that is your `factory_stage_done` summary. The

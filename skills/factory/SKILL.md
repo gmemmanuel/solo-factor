@@ -17,6 +17,13 @@ agents may do unasked, what the founder must try, and which skill each stage
 uses. If it does not exist, the factory has not been set up here: say so in
 a `blocked` report (a standing agent runs `factory-onboarding` instead).
 
+**The rules that matter are scripts, in `scripts/factory/`.** Which plan
+belongs to your branch, whether a plan declares its files, whether a review
+is recorded for the commit being shipped, whose turn it is to merge or to
+use a shared dev resource: each has a script that answers it, and your
+stage's skill names the command. Run the script and act on its exit code.
+Never work around one that refuses; its message says what is missing.
+
 ## If you are running a stage
 
 Your first message names the ticket, the stage, and the project skill to use.

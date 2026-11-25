@@ -13,6 +13,18 @@ complete branch once, after the builder's own verification. The review has
 two parts: a structured read of the diff, and, when the change warrants it,
 a verification pass you design and run yourself.
 
+## Find what you are reviewing
+
+```sh
+node scripts/factory/plan-doc.mjs
+```
+
+**Exit 0** prints the plan: review against it and record the review in it.
+**Exit 3** prints `SMALL_BUG: <KEY>`: a small bug is not reviewed by
+default, so you are here because the founder asked; the ticket is the plan
+and the review is recorded as a comment on it. **Exit 1**: stop and report
+`blocked` with its message.
+
 ## You fix what you find
 
 **Default on every defect: fix it, verify it, report it as fixed.** Ordinary
@@ -132,7 +144,9 @@ wording and density, not just colours. A mismatch is a finding.
 
 ## Step 4: record it
 
-Append to the plan document (for a small bug, to the ticket):
+The review is not finished until this record exists and the script accepts
+it. A verdict in chat is not a review. Append to the plan document (for a
+small bug, post it as a comment on the ticket):
 
 ```markdown
 ## Code review - [date and time] - [agent]
@@ -154,7 +168,26 @@ Depth: [Light | Standard | Deep] - [changed lines, files, surfaces]
 ### Needs a decision
 [Product forks, scope changes, contradictions with a recorded decision, each
 with a recommendation. `None` is the signal the branch is ready.]
+
+<!-- factory-review:v1 {"stage":"code_review","head":"[full SHA]","disposition":"[complete|decision_required|blocked]","agent":"[agent]","recorded_at":"[UTC time, ISO, ending in Z]"} -->
 ```
+
+The last line is the receipt: one line, the same full SHA as "Reviewed
+head", which is the head after your last code fix. If plans live in the
+repository, commit and push the plan on its own afterwards: a commit that
+touches only plan documents does not count as a change since review. Then
+prove it:
+
+```sh
+node scripts/factory/review-receipt.mjs --plan "$(node scripts/factory/plan-doc.mjs)" --mode record --head <reviewed SHA>
+```
+
+For a small bug, `--ticket <KEY>` in place of `--plan`. If the script
+refuses, fix the record; do not report the review as done.
+
+Use `complete` only when the review work is finished and nothing is
+returned; `decision_required` when one of the three returnable things
+remains; `blocked` when required review work could not finish.
 
 Severity: **CRITICAL** is a security hole, data loss or a crash on a main
 path. **HIGH** is a functional bug or broken experience. **MEDIUM** will

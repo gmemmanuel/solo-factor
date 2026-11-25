@@ -638,7 +638,7 @@ const toolResult = async (work: () => Promise<string>) => {
       const charter = agent !== undefined && SKILLS.has(agent.skill) ? [agent.skill] : [];
       return {
         tools: ["factory_ask_founder", "factory_close_ask", "factory_message", "factory_enqueue", "factory_status"],
-        skills: ["factory", ...charter, ONBOARDING_SKILL, ...PROCESS_SKILLS],
+        skills: ["factory", ...charter, ONBOARDING_SKILL, SEQUENCE_SKILL, ...PROCESS_SKILLS],
       };
     }
     // Any other thread in a project with a factory (a side thread they start,
@@ -833,6 +833,8 @@ const SKILLS = new Set(["factory", "factory-orchestrator", "factory-issue-owner"
  * them; each reads the project's FACTORY.md first, which may name a project
  * skill to use instead.
  */
-const PROCESS_SKILLS = ["factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship"];
+const PROCESS_SKILLS = ["factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship", "factory-tracker"];
+/** Deciding the lanes belongs to standing agents (the Architect); stage threads only run the light refresh their skills name. */
+const SEQUENCE_SKILL = "factory-sequence";
 /** Setting the factory up in a project. Any standing agent may be the one the founder starts with. */
 const ONBOARDING_SKILL = "factory-onboarding";

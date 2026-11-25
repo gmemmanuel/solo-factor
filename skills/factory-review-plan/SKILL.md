@@ -18,6 +18,17 @@ In the factory, reviewing the plan also makes you the ticket's **issue
 owner** until it ships: the builder's questions come to you. The
 `factory-issue-owner` skill covers that.
 
+## Find the plan
+
+```sh
+node scripts/factory/plan-doc.mjs              # prints this branch's plan; exit 1 with the reason if it cannot
+node scripts/factory/plan-surfaces.mjs --branch
+```
+
+Use the exact file the first command prints. Never search for a plan by
+hand: two agents that each "found" a plan is how a review lands on the
+wrong document. A failing surfaces check is yours to fix (item 6 below).
+
 ## You fix what you find
 
 **Default on every defect: fix it in the plan, verify the claim, report it
@@ -113,7 +124,10 @@ Then report:
   summary gives the product explanation in two or three sentences, the count
   of corrections, and ends with `Implementer tier: Tier N` and the builder.
   First record both on the ticket, so the build starts on the right model:
-  `bb factory tier <KEY> --tier N --builder ui|fullstack`.
+  `bb factory tier <KEY> --tier N --builder ui|fullstack`. With a tracker,
+  replace "Plan written" with "Plan reviewed" and read the ticket back
+  (`factory-tracker` skill); the scheduler treats that label as the proof
+  of review.
 - **A founder decision:** `factory_ask_founder`, in the shape above, then
   end your turn. When the answer arrives, fold it into the plan and report
   complete.

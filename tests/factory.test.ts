@@ -45,7 +45,7 @@ function setup() {
   const lastTurn = new Map<string, "user" | "agent" | "plugin">();
   const host = createFakePluginHost({
     pluginId: "bbonductor",
-    agentSkillIds: ["factory", "factory-orchestrator", "factory-issue-owner", "factory-deploy", "factory-harness-improver", "factory-watch", "factory-cleaner", "factory-integrator", "factory-contacts", "factory-onboarding", "factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship"],
+    agentSkillIds: ["factory", "factory-orchestrator", "factory-issue-owner", "factory-deploy", "factory-harness-improver", "factory-watch", "factory-cleaner", "factory-integrator", "factory-contacts", "factory-onboarding", "factory-debug", "factory-plan", "factory-review-plan", "factory-build", "factory-review-code", "factory-ship", "factory-tracker", "factory-sequence"],
     sdk: {
       projects: {
         list: async () => [{ id: PROJECT, name: "Acme" }],
@@ -1579,7 +1579,8 @@ describe("configuration and CLI", () => {
     const agent = await t.harness.behavior.resolveAgentConfiguration(
       makePluginAgentConfigurationContext({ pluginMetadata: { binding: { kind: "agent", agentId: "harness-improver", projectId: PROJECT } } } as never),
     );
-    for (const skill of ["factory-harness-improver", "factory-onboarding", "factory-plan"]) expect(JSON.stringify(agent?.skills)).toContain(skill);
+    expect(JSON.stringify(stage?.skills)).not.toContain("factory-sequence");
+    for (const skill of ["factory-harness-improver", "factory-onboarding", "factory-plan", "factory-sequence", "factory-tracker"]) expect(JSON.stringify(agent?.skills)).toContain(skill);
   });
 
   it("gives a configuration saved before builder tiers existed tier 2 and 3 builders copied from its builder", async () => {

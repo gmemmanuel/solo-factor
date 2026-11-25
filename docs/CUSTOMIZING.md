@@ -12,6 +12,8 @@ there is to decide and where each kind of change belongs.
 | Which model plays a role, or its fallback | Factory → Settings, or `bb factory role` | one project |
 | Which skill a stage uses | `bb factory stage <stage> --prompt …` and the "Stage skills" table in `FACTORY.md` | one project |
 | How many tickets run at once, the ticket link | Factory → Settings | one project |
+| A script's setting (base branch, CI check, lane limit, tracker, labels) | `factory.config.json` in your repository | one project |
+| What a script enforces | `scripts/factory/` in your repository; or `kit/` in your clone, then reinstall | one project; or all |
 | How planning, review, build or ship is done | the skill in `skills/` (or your project's own skill) | every project on this machine |
 | What a standing agent is for | its charter in `skills/` | every project |
 | Stages, pipelines, roles, standing agents that exist by default | `src/factory/defaults.ts` | new projects |
@@ -36,9 +38,11 @@ The Mechanic asks these during onboarding and recommends an answer for each.
 4. **What agents may do unasked.** Deploying to a dev environment and
    seeding test accounts make agent-run QA possible. Anything touching
    production or real users' data should need you.
-5. **Tracker.** The factory tracks tickets itself by key and title; it does
-   not need a tracker. If you use one, the profile says how agents read and
-   file tickets. Filing always starts with your approval.
+5. **Tracker.** Linear is supported directly: agents read, file, label and
+   close tickets with `scripts/factory/linear.mjs`, and the scheduler reads
+   Linear's blocking relations and plan labels. Without one, the factory's
+   own record and the plan documents are the tickets. Filing always starts
+   with your approval. A ticket system inside the factory is planned.
 6. **Where plans live.** In the repository (`docs/plans/`) is simplest. A
    separate repository keeps plan churn out of your history.
 7. **Standing agents.** Start with the Architect and the Mechanic. Each one
@@ -69,15 +73,20 @@ relies on:
 Honest notes from generalizing this out of one project:
 
 - **Transfers as is:** the engine; the worker protocol; the charters; the
-  plan contract and implementer tiers; "reviewers fix what they find and
+  scripts (plan lookup, review receipts, merge and dev turns, swimlane
+  scheduling); the plan contract and implementer tiers; "reviewers fix what they find and
   return only product forks, scope changes and contradictions"; one review
   pass; the issue owner; the founder gate.
 - **Needs your project's facts** (that is `FACTORY.md`): every command, the
   tracker, the merge path, test accounts, what counts as a live check.
-- **Needs building per project:** the Observer's checks (they depend on
-  where your evidence lives), a deploy runbook, a UI preview harness, and
-  any turn-taking for shared resources such as one dev deploy slot. The
-  skills describe the shape; the scripts are yours.
+- **Needs building per project**, and the Mechanic owns getting it built
+  during setup: the Observer's checks (they depend on where your evidence
+  lives; the Observer proposes and schedules them), a deploy runbook, a UI
+  preview harness, a live check for behaviour tests cannot prove, and
+  wrappers so your deploy commands take their own turn.
+- **Assumes GitHub** for the merge turn (pull requests, check runs). A
+  repository with a merge queue should use the queue instead.
+- **Linear or nothing** for tickets, today.
 - **Assumes a single founder.** The inbox, the gate and the charters address
   one decision-maker. A team needs routing this does not have.
 - **Assumes git worktrees and pull requests.**

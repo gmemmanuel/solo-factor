@@ -23,30 +23,64 @@ shared infrastructure.
 1. **The founder's check.** If this ticket changes what users see, the
    factory starts this stage only after the founder approved it. Outside the
    factory, confirm that approval exists before going on.
-2. **The review.** Find the latest `## Code review` section in the plan (or
-   on the ticket, for a small bug that was reviewed) and compare its
-   `Reviewed head` with `git rev-parse HEAD`:
-   - Same commit, disposition `complete`: go on. Read its "Issues found and
-     fixed" so you know what the reviewer changed.
-   - The reviewed head is an ancestor of HEAD: inspect what changed since
-     (`git diff <reviewed>..HEAD`). Merges from the base branch and
-     mechanical conflict fixes are yours to close: rerun the affected
-     checks and note it under the review. New behaviour is not: send it back
-     with `bb factory rereview <KEY>`.
-   - Disposition `decision_required` or `blocked`, or no review on a planned
-     ticket: stop and report `blocked`. Never reconstruct a review from memory.
-   - A small bug ships without a review. Confirm its ticket records the
-     exact reproduction and at least one designed variation.
+2. **The review.** `node scripts/factory/plan-doc.mjs` tells you what kind
+   of branch this is. For a planned ticket (exit 0), the script decides
+   whether the review covers what you are about to ship:
+
+   ```sh
+   PLAN="$(node scripts/factory/plan-doc.mjs)"
+   node scripts/factory/review-receipt.mjs --plan "$PLAN" --mode ship --head "$(git rev-parse HEAD)"
+   ```
+
+   - **It passes:** go on. Read the review's "Issues found and fixed" so
+     you know what the reviewer changed.
+   - **"HEAD moved since the review":** the reviewed commit is an ancestor
+     of yours. Inspect the difference (`git diff <reviewed>..HEAD`). A merge
+     from the base branch and mechanical conflict fixes are yours to close:
+     rerun the affected checks and record the closeout below. New behaviour
+     is not: send it back with `bb factory rereview <KEY>`.
+   - **"The review returned a decision":** it must be resolved (by the
+     founder or the issue owner) before you record a closeout.
+   - **Blocked, missing, malformed, or not an ancestor:** stop and report
+     `blocked`. Never reconstruct a review from memory.
+   - **A small bug (exit 3)** ships without a review. Confirm its ticket
+     records the exact reproduction and at least one designed variation.
+
+   A closeout is appended to the plan after the review, at the final head:
+
+   ```markdown
+   ## Ship closeout - [date] - [agent]
+
+   ### Changes since review
+   [What changed after the reviewed head, and why it needs no new review.]
+
+   ### Verification
+   [What you reran, and the results.]
+
+   <!-- factory-review:v1 {"stage":"closeout","head":"[full SHA]","disposition":"closed","code_review_head":"[reviewed SHA]","agent":"[agent]","recorded_at":"[UTC time, ISO, ending in Z]"} -->
+   ```
+
+   Then `review-receipt.mjs --mode ship` again, and it must pass. A commit
+   that touches only plan documents does not count as a change, so
+   committing the closeout itself never needs another one.
 3. **One outcome, one pull request.** Every planned step is done. Never open
    a pull request for a foundation or plumbing step whose value depends on
    later work.
 
-## Step 1: sync with the base branch
+## Step 1: take the ship turn, then sync with the base branch
+
+Branches land one at a time. Two branches that sync and run CI side by side
+go stale the moment the first merges; holding one turn from "merge base" to
+"merged" means CI tests the tree that actually lands.
 
 ```sh
+node scripts/factory/ship-turn.mjs take     # waits for the holder; exit 75 if no turn in time
 git fetch origin
 git merge origin/<base>
 ```
+
+Never merge around the turn's holder. If the merge brought anything in,
+that is a change since review: record the closeout above at the new head.
 
 Resolve conflicts by understanding both sides. If a conflict needs a
 decision about behaviour, stop and send it to the issue owner.
@@ -54,9 +88,8 @@ decision about behaviour, stop and send it to the issue owner.
 ## Step 2: verify green
 
 Run the profile's lint, type and test commands for the change. Fix what
-fails at its cause. Never weaken or skip a check to get through. If
-something only one branch may use at a time gates merging, take the turn the
-way the profile says.
+fails at its cause. Never weaken or skip a check to get through. A fix here
+is a change since review: record the closeout.
 
 ## Step 3: close out knowledge
 
@@ -87,13 +120,25 @@ Leave out reviewer instructions, verification steps and product pitch.
 
 ## Step 5: wait for CI, then merge
 
-Wait for the profile's required check on the **exact head** you pushed. On
-green, merge with the profile's method. On red, read the failure, fix the
-cause, push, and wait again. A flaky check is rerun once, and reported if it
-fails twice.
+```sh
+node scripts/factory/ship-turn.mjs land --pr <number>
+```
 
-After merging, do what the profile says to the tracker (close the ticket,
-move a label) for every ticket this branch resolved, riders included.
+It waits for the required check on the **exact head** you pushed, renews
+the turn while it waits, merges with the project's method on green, and
+releases the turn. It refuses (exit 4, turn kept) when the pull request is
+not this exact commit or the base moved: fix what it says and rerun. On a
+red or timed-out check (exit 1) it releases the turn so the next branch can
+land: read the failure, fix the cause, and take the turn again. A check you
+believe is flaky is rerun once, and reported if it fails twice.
+
+If the profile says the founder merges, add `--no-merge`: it only waits for
+green, and you report the pull request as open and unmerged. Never merge
+any other way.
+
+After merging, with a tracker, close every ticket this branch resolved,
+riders included (`factory-tracker` skill). Then run
+`node scripts/factory/sequence.mjs refresh` so the lanes move on.
 
 ## Reporting
 

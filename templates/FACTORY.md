@@ -16,14 +16,14 @@ A section that says "none" is better than a section left as a template.
 
 ## Tracker
 
-- **Where tickets live:** <Linear | GitHub Issues | Jira | a markdown file | none>
-- **Key format:** <APP-123> · **Link:** <https://…/{key}> (also set under Factory → Settings)
-- **How an agent reads, files and updates a ticket:** <exact command or script; "ask the founder" is a valid answer for filing>
-- **Labels or states the pipeline moves:** <e.g. Plan written → Plan reviewed → In progress → Done; or "none">
+- **Where tickets live:** <Linear | none: the factory's own record and the plans are the tickets>
+- **Key format:** <APP-123> · **Link:** <https://linear.app/your-team/issue/{key}> (also set under Factory → Settings)
+- **How an agent reads, files and updates a ticket:** `node scripts/factory/linear.mjs …` (the `factory-tracker` skill). The API key comes from <`LINEAR_API_KEY` | the command in `tracker.keyCommand`>.
+- **Labels the pipeline moves:** Plan written → Plan reviewed; Small bug; Later. **Started state:** <In Progress>
 
 ## Plans
 
-- **Where plan documents live:** `docs/plans/` <or another path, or another repository>
+- **Where plan documents live:** `docs/plans/` <or another path, or another repository>. `node scripts/factory/plan-doc.mjs` finds a branch's plan; nobody searches by hand.
 - **Naming:** `<KEY> - short title.md`. One outcome, one plan, one branch, one pull request.
 - **Decision log:** <path, or "none yet"> · **Learnings:** `LEARNINGS.md`
 - **Standing references agents must read before planning in a domain:** <list, or "none">
@@ -32,9 +32,27 @@ A section that says "none" is better than a section left as a template.
 
 - **Base branch:** `main` · **Branch naming:** <e.g. `app-123-short-title`>
 - **Required check on a pull request:** <exact CI check name>
-- **Who merges:** <the ship stage merges on green CI | the founder clicks merge>
+- **Who merges:** <the ship stage, with `scripts/factory/ship-turn.mjs land` on green CI | the founder; ship uses `land --no-merge`>
 - **Merge method:** <squash | merge | rebase>
-- **Shared things only one branch may use at a time:** <a dev deploy slot, a device, a staging database; and the script that takes the turn, or "none">
+- **Shared things only one branch may use at a time**, each with its turn name for `scripts/factory/turn.mjs`:
+
+  | Turn name | What it is | The command that takes the turn itself |
+  |---|---|---|
+  | `<api>` | <the one dev deployment of the API> | <`scripts/deploy-dev.sh`, or "take it by hand"> |
+
+## Scripts
+
+`scripts/factory/` holds the pipeline's rules as scripts; `factory.config.json` holds their settings. Run them; do not work around one that refuses.
+
+| Script | Answers |
+|---|---|
+| `plan-doc.mjs` | Which plan belongs to this branch (exit 0), or that it is a small bug (exit 3) |
+| `plan-surfaces.mjs` | Whether a plan declares the files it will touch |
+| `review-receipt.mjs` | Whether a review is recorded for the exact commit being shipped |
+| `ship-turn.mjs` | Whose turn it is to land on the base branch; merges on green CI |
+| `turn.mjs` | Whose turn it is to use a shared dev resource |
+| `sequence.mjs` | Which tickets can run side by side; publishes the swimlanes |
+| `linear.mjs` | Tickets: read, file, label, comment, close |
 
 ## Verification
 

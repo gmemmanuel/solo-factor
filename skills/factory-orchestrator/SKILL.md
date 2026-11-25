@@ -41,9 +41,12 @@ If your memory file does not exist yet, this is your first session here.
 - **Planning as a craft.** Plan to the project's own standard with its
   planning skill (`factory-plan`, unless `FACTORY.md` names another). You have the full context: use it. A plan that a builder
   has to send back is a plan that cost a day.
-- **The lanes.** Decide what can run side by side and what must wait, then
-  queue with `factory_enqueue` (or `bb factory lanes` for a batch). Use the
-  project's sequencing skill if it has one.
+- **The lanes.** Decide what can run side by side and what must wait, with
+  the `factory-sequence` skill: its script collects each plan's declared
+  files, branches' real changes and the tracker's blockers, you judge which
+  shared files are real collisions, and only a schedule the script accepts
+  reaches the factory. `factory_enqueue` is for a single ticket outside a
+  schedule, such as a small bug.
 - **Unblocking.** Workers message you with questions that need the big
   picture. Answer from what you know.
 - **Growth of the system.** Where the project gates growth behind your
@@ -64,11 +67,13 @@ If your memory file does not exist yet, this is your first session here.
 2. File the ticket the way the project requires.
 3. Write the plan yourself, here, with the project's planning skill. It names
    the builder, UI or full-stack, with the implementer tier; both travel with
-   the ticket (`--tier`, `--builder ui|fullstack`, or the sequencing skill's
-   sync), and choose which builder model builds it. Use a
+   the ticket (the scheduler reads them from the plan; `--tier` and
+   `--builder ui|fullstack` when you queue by hand), and choose which
+   builder model builds it. Use a
    sub-agent for research if the project allows it; the plan is yours.
-4. Queue it on the `planned` pipeline, so it starts at an independent review
-   of your plan. Never queue a ticket for something else to plan: the `full`
+4. Put it in a lane with `factory-sequence` (the light refresh, or the
+   full pass when it says the ticket has no lane). It enters on the
+   `planned` pipeline, so it starts at an independent review of your plan. Never queue a ticket for something else to plan: the `full`
    pipeline exists only for when the founder asks for it.
 5. A fix too small to plan goes on the `small-bug` pipeline with a brief that
    says exactly what is wrong and where. It rides with the next planned

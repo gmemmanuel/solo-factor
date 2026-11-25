@@ -14,9 +14,12 @@ them instead of one they must fit.
 The Mechanic normally runs this. Any standing agent may, if it is the one the
 founder started first.
 
-**The result is `FACTORY.md` in the project's root**, filled from evidence,
-plus a short list of decisions only the founder can make. Do not start the
-pipeline on real work until it exists.
+**The result is four things in the project:** `FACTORY.md`, the profile
+agents read; `factory.config.json`, the same facts for the scripts;
+`scripts/factory/`, the scripts that enforce the pipeline's rules; and a
+short setup list of what the project still lacks, which you then build.
+Plus the decisions only the founder can make. Do not start the pipeline on
+real work until the first three exist.
 
 ## How to behave
 
@@ -70,7 +73,9 @@ nothing; "none found" is a finding.
    pull requests: branch naming, squash or merge, who merges, how commit
    messages look, whether pull requests carry a ticket key.
 6. **Tracker.** Ticket keys in commits and branches, a tracker CLI or API
-   script in the repository, credentials an agent can already use.
+   script in the repository, credentials an agent can already use. The
+   factory works with Linear, or with no tracker; for Linear, find the team
+   key and how an agent session gets the API key without printing it.
 7. **Plans, decisions, learnings.** Any plan or design documents, an ADR or
    decision log, a `LEARNINGS.md`. Where they live and whether they are
    current.
@@ -97,8 +102,11 @@ and say why in one line.
 | Build | `factory-build` | implementation rules in `AGENTS.md` |
 | Review code | `factory-review-code` | a review checklist or skill |
 | Ship | `factory-ship` | a release or pull-request skill, merge automation |
+| Swimlanes | `factory-sequence` and `scripts/factory/sequence.mjs` | usually none |
+| Tickets | `factory-tracker` and `scripts/factory/linear.mjs` | a tracker script or connector |
 | Deploy | none: the Deployer needs the project's own runbook | deploy scripts, a release skill |
 | Dependencies | none: the Integrator needs a method | Renovate, Dependabot, an update skill |
+| Their own enforcement scripts | `scripts/factory/` | merge queues, branch protection, a plan or review check |
 
 Rules for the decision:
 
@@ -115,6 +123,9 @@ Rules for the decision:
   thread); to spawn its own reviewer (the factory starts one, in a fresh
   thread); or to push to the base branch. List each with the file and line
   and the smallest edit that removes it.
+- **Enforcement they already have wins too.** If the repository uses a
+  GitHub merge queue, the ship turn is redundant: say so in `FACTORY.md` and
+  have the ship stage use the queue. Never run two mechanisms for one rule.
 - **A mobile app gets the mobile pack.** If the project is React Native,
   Expo, or native iOS or Android, offer `packs/mobile` (see Step 6).
 
@@ -145,11 +156,37 @@ Also ask, once, the open question: **"How have you been working with agents
 so far, and what about it costs you the most?"** Their answer is your first
 retro. Write it into your memory file.
 
-## Step 5: write the profile
+## Step 5: install the scripts and write the profile
 
-Copy `templates/FACTORY.md` from the factory's repository (`bb plugin list`
-shows where the plugin was installed from) to the project root and fill
-every section from Steps 2 to 4. Commands must run as written; paths must
+The factory's repository is the founder's clone (`bb plugin list` shows
+where the plugin was installed from). From the project's root, on a branch:
+
+```sh
+node <factory clone>/kit/install.mjs .
+```
+
+That copies the scripts into `scripts/factory/` and writes a starter
+`factory.config.json`. Fill the config from what you found: `baseBranch`,
+`plansDir`, `keyPattern` if ticket keys are unusual, `ci.check` (the exact
+name of the required check), `merge.method`, `lanes.max` (what the founder
+chose), and `tracker` (`kind: "linear"`, `team`, `url`, the label names,
+and `keyCommand` if the key comes from a password manager's CLI). Then
+prove each script against the real project:
+
+```sh
+node scripts/factory/plan-doc.mjs --plan-dir      # prints a directory that exists
+node scripts/factory/turn.mjs status
+node scripts/factory/ship-turn.mjs status
+node scripts/factory/linear.mjs board             # with Linear: the open tickets
+node scripts/factory/sequence.mjs collect         # the board; needs bb open
+```
+
+With Linear, create the labels the config names ("Plan written", "Plan
+reviewed", "Small bug", "Later") if the team lacks them. A script that
+fails here will fail a stage later: fix the config or the access now.
+
+Then copy `templates/FACTORY.md` to the project root and fill every section
+from Steps 2 to 4. Commands must run as written; paths must
 exist. Where something does not exist yet (no plan directory, no decision
 log), create the minimum (`docs/plans/`, an empty `LEARNINGS.md`) and say so.
 
@@ -178,7 +215,41 @@ skill directory (`.agents/skills/` or `.claude/skills/`, wherever its skills
 already live), then edit each to match the project: real commands, real
 paths, the project's name for things. Record it under "Packs installed".
 
-## Step 7: start the others, and prove it works
+## Step 7: build what the project lacks
+
+The scripts cover what every project shares. Three things cannot be
+shipped, because they depend on the project, and a factory without them
+runs blind. You own getting each one built. Write them in your memory file
+as a setup list, and work it down with the founder over the first days:
+
+1. **Shared things that need turns.** From item 8 of Step 2: anything only one
+   branch may use at a time. Give each a short name, list them in
+   `FACTORY.md`, and wrap the project's deploy or test command so it takes
+   the turn itself (`turn.mjs take <name>` before, `renew` during). A rule
+   agents must remember is weaker than a wrapper that does it.
+2. **A way to see UI without a device** (if the product has screens). If
+   the project cannot render its screens to images, the founder's check has
+   no before/after picture and builders ship UI unseen. Queue the harness
+   as a ticket through the Architect; the mobile pack's `mobile-ui-preview`
+   describes its shape. Record the render command in `FACTORY.md`.
+3. **A deploy runbook** (if the founder wants the Deployer). Read the deploy
+   scripts, CI and release history, write the runbook as a project skill,
+   and have the founder confirm it before first use. The Deployer's charter
+   says what it must contain.
+4. **The Observer's checks.** The Observer sets these up itself on its
+   first run: it inventories what evidence it can read, proposes checks and
+   schedules them. Your part is to make sure that run happens once there is
+   something to observe, that each check it could not reach gets its access
+   fixed, and that the checks land in `FACTORY.md`.
+5. **A live check for behaviour tests cannot prove** (if the product has AI
+   or background behaviour): a replay or end-to-end runner a builder can
+   run against dev with a test account, and a budget for it. Queue it as a
+   ticket; record the command in `FACTORY.md`.
+
+Each of these is done when an agent that has never seen the project can use
+it from `FACTORY.md` alone.
+
+## Step 8: start the others, and prove it works
 
 1. Tell the founder to start the Architect from Factory → Agents (or run
    `bb factory agent start orchestrator`), and any other agents they chose.

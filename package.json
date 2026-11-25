@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-bbonductor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A software factory for a solo founder, on bb: swimlanes, a staged pipeline of independent agents with a model per role, one inbox for decisions, standing agents, and editable process skills.",
   "type": "module",
   "license": "MIT",
@@ -9,7 +9,8 @@
     "build": "bb plugin build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "verify": "npm run typecheck && npm test && npm run build"
+    "verify": "npm run typecheck && npm test && npm run test:kit && npm run build",
+    "test:kit": "node --test kit/"
   },
   "engines": {
     "bb": ">=0.49",

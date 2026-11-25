@@ -38,12 +38,13 @@ Founder ──► Architect (standing thread, main checkout)
 | Project profile | `templates/FACTORY.md` | Copied into a project by onboarding. Every bundled skill reads the project's copy first |
 | Packs | `packs/` | Stack-specific skills copied into a project (`mobile`) |
 
-## Three layers
+## Four layers
 
 | Layer | Where | Owns |
 |---|---|---|
 | Flow | `src/` (the engine) | What starts next, where, on which model, and who is told. No opinion on how work is done |
 | Process | `skills/` | The worker protocol, standing agents' charters, and default process skills. No project specifics |
+| Enforcement | `kit/`, installed into a project as `scripts/factory/` | Plan lookup, review receipts, merge and dev turns, swimlane scheduling, Linear. Rules as exit codes |
 | Project | the project's `FACTORY.md` and its own skills | Commands, paths, tracker, gates, stack |
 
 Which skills a thread gets is decided in `server.ts` (`bb.agents.configure`), keyed on the thread's plugin metadata: stage and owner threads get the protocol, the owner charter and the process skills; standing agents get the protocol, their charter, onboarding and the process skills; any other thread in a project with a factory gets `factory-contacts`.
@@ -115,7 +116,9 @@ A standing agent is a pinned thread in the project's main checkout, started from
 | Scheduled prompts (weekly retro, triage) | bb's built-in Automations plugin, running `bb factory prompt <agent> "…"` as a script |
 | Notifications to phone and desktop | bb's built-in Push notifications plugin (the factory calls it) |
 | Pull request status | bb's built-in GitHub PR status plugin |
-| Taking turns for dev deploys, CI, and merging | The project's own scripts, named in its `FACTORY.md` |
+| Taking turns for dev deploys and merging | `kit/turn.mjs` and `kit/ship-turn.mjs`: file-based turns shared by every worktree of a repository, expiring on their own |
+| Which tickets may run side by side | `kit/sequence.mjs` validates the Architect's schedule against plans' declared files, branches' real changes and tracker blockers, then calls `bb factory sync`. The engine only runs the lanes it is given |
+| Tickets | Linear, through `kit/linear.mjs`, or none. A built-in ticket system is planned |
 | How to plan, review, build, ship | Skills: the bundled defaults in `skills/`, or the project's own. Never the engine |
 | Everything specific to one project | That project's `FACTORY.md` |
 

@@ -12,6 +12,20 @@ the Build row's project additions on top.
 Implement the complete outcome, precisely as planned. Phases in the plan are
 commits on this branch, not places to stop.
 
+## Find the plan
+
+```sh
+node scripts/factory/plan-doc.mjs
+```
+
+- **Exit 0** prints the plan. Use that exact file.
+- **Exit 3** prints `SMALL_BUG: <KEY>`: the ticket is the plan. Go to "Small
+  bugs" below.
+- **Exit 1** is anything else. Stop and report `blocked` with its message.
+  A missing plan is never evidence that something is a small bug.
+
+With a tracker, move the ticket to its started state as you begin.
+
 ## Build the contract as written
 
 The plan's **Implementation contract** is decided: its names, shapes,
@@ -79,8 +93,14 @@ QA is your deliverable, not the reviewer's and not the founder's.
 - **Before changing a screen, open the approved mockup** the plan names. If
   it is missing, or the build needs a design decision it does not answer,
   stop and raise it. Do not decide hierarchy or wording yourself.
-- Do in dev what `FACTORY.md` says agents may do unasked. If something only
-  one branch may use at a time, take the turn the way the profile says.
+- Do in dev what `FACTORY.md` says agents may do unasked.
+- **Take a turn on anything only one branch may use at a time** (a dev
+  deploy slot, a staging database, a device; `FACTORY.md` names them):
+  `node scripts/factory/turn.mjs take <name…>` before you use it, `renew`
+  while you do, and `release` as soon as your check is finished or you go
+  back to editing. It waits for the holder; never deploy or test around
+  one. A wait is not a blocker to report; exit 75 (no turn within the
+  limit) is.
 
 Record in the plan exactly what you ran and the results. The reviewer starts
 from that record.

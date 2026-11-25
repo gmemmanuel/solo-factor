@@ -714,6 +714,47 @@ async function main() {
     check("the next ticket in the lane starts", next === true);
     const told = await until(() => (lastMessage(ticket("LIVE-2").threads.build ?? "").includes("LIVE-4: Typo on the greeting") ? true : null));
     check("its builder is told about the small bug riding with it", told === true);
+
+    // --- the scripts in kit/, against this real server
+    const kit = (script, args = [], options = {}) => {
+      try {
+        return { code: 0, out: sh(process.execPath, [join(root, "kit", script), ...args], { cwd: repoDir, env: { ...env, BB_BIN: bbBin, FACTORY_BB_PROJECT: project, FACTORY_STATE_DIR: join(work, "state") }, ...options }).trim() };
+      } catch (error) {
+        return { code: error.status ?? 1, out: `${error.stdout ?? ""}${error.stderr ?? ""}`.trim() };
+      }
+    };
+    rmSync(join(work, "state"), { recursive: true, force: true });
+    mkdirSync(join(repoDir, "docs", "plans"), { recursive: true });
+    const planText = (title, extra) => `# ${title}\n\n## Surfaces\n\n- \`src/cart.ts\` (new)\n\n**Implementer tier:** Tier 2 - one open cell\n**Builder:** UI - a screen\n${extra}`;
+    writeFileSync(join(repoDir, "docs", "plans", "LIVE-20 - Coupons.md"), planText("Coupons", "\n## Plan review - today - reviewer\n"));
+    writeFileSync(join(repoDir, "docs", "plans", "LIVE-21 - Gift cards.md"), planText("Gift cards", ""));
+    const collected = kit("sequence.mjs", ["collect"]);
+    const digest = /board_sha256: ([0-9a-f]{64})/.exec(collected.out)?.[1];
+    check("the scheduler reads the board from plans and the real factory, and finds the shared file", collected.code === 0 && /LIVE-20 \/ LIVE-21: src\/cart\.ts/.test(collected.out), collected.out.slice(-600));
+    const boardNow = JSON.parse(readFileSync(join(work, "state", "sequence", "board.json"), "utf8")).tickets;
+    const rest = boardNow.filter((t) => !["LIVE-20", "LIVE-21"].includes(t.key) && t.step !== "plan");
+    const order = { "in-flight": 0, later: 2 };
+    rest.sort((a, b) => (order[a.step] ?? 1) - (order[b.step] ?? 1));
+    const lanes = [...(rest.length ? [{ name: "Existing", tickets: rest.map((t) => t.key) }] : []), { name: "Coupons", tickets: ["LIVE-20"] }, { name: "Gifts", tickets: ["LIVE-21"] }];
+    const schedulePath = join(work, "state", "sequence", "schedule.json");
+    writeFileSync(schedulePath, JSON.stringify({ board_sha256: "stale", lanes }));
+    check("it refuses a schedule made against an older board", /Stale schedule/.test(kit("sequence.mjs", ["publish"]).out));
+    writeFileSync(schedulePath, JSON.stringify({ board_sha256: digest, lanes: lanes.slice(0, -1) }));
+    check("it refuses a schedule that leaves a planned ticket out", /LIVE-21 \(review\) has no lane/.test(kit("sequence.mjs", ["publish"]).out));
+    writeFileSync(schedulePath, JSON.stringify({ board_sha256: digest, lanes }));
+    const published = kit("sequence.mjs", ["publish"]);
+    check("an accepted schedule reaches the factory's lanes", published.code === 0 && ticket("LIVE-20")?.lane === "Coupons" && ticket("LIVE-21")?.lane === "Gifts", published.out.slice(-600));
+    check("a reviewed plan starts at build on its plan's tier and builder; an unreviewed one starts at plan review", ticket("LIVE-20")?.pipeline === "reviewed" && ticket("LIVE-20")?.tier === 2 && ticket("LIVE-20")?.builder === "ui" && ticket("LIVE-21")?.pipeline === "planned");
+    check("the later of two tickets sharing a file waits for the first", JSON.stringify(ticket("LIVE-21")?.waitingOn) === '["LIVE-20"]' && ticket("LIVE-21")?.status === "queued", JSON.stringify(ticket("LIVE-21")));
+    sh("git", ["checkout", "-q", "-b", "live-4-typo"], { cwd: repoDir });
+    const small = kit("plan-doc.mjs");
+    sh("git", ["checkout", "-q", "-b", "live-20-coupons"], { cwd: repoDir });
+    const planned = kit("plan-doc.mjs");
+    sh("git", ["checkout", "-q", "main"], { cwd: repoDir });
+    check("a branch for a small bug riding with a ticket resolves as a small bug, from the factory's own record", small.code === 3 && small.out === "SMALL_BUG: LIVE-4", `${small.code} ${small.out}`);
+    check("a branch for a planned ticket resolves to its plan", planned.code === 0 && planned.out.endsWith("LIVE-20 - Coupons.md"), `${planned.code} ${planned.out}`);
+    bb(["factory", "cancel", "LIVE-20", "--project", project]);
+    bb(["factory", "cancel", "LIVE-21", "--project", project]);
   } finally {
     const failed = results.filter((result) => !result.ok).length;
     console.log(`\n${results.length - failed}/${results.length} live checks passed.`);
