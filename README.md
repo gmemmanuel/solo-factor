@@ -1,6 +1,6 @@
 # Solo Factor
 
-<p align="center"><img src="docs/assets/factory.svg" alt="Tickets ride a conveyor belt through five stations: plan review, build, code review, you try it, and ship. Each leaves merged." width="100%"></p>
+<p align="center"><img src="docs/assets/factory.svg" alt="Tickets ride a conveyor belt through five stations: plan review, build, code review, you try it, and ship. A line underneath shows your attention, lit only at the one station that needs you." width="100%"></p>
 
 > I outgrew Conductor and the labs' own desktop apps. Optimizing for the
 > solo factor, on bb, was the obvious next step.
